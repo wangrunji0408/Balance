@@ -5,14 +5,28 @@ package Functions is
 	-- FGPA平台显示译码器顺序
 	function DisplayNumber (number: std_logic_vector(3 downto 0))
 		return std_logic_vector;
-	type DisplayNums is array (7 downto 0) of std_logic_vector(6 downto 0);
+	subtype DisplayCode is std_logic_vector(6 downto 0);
+	type DisplayNums is array (7 downto 0) of DisplayCode;
 	type TPos is (None, Road);						--地图每格类型：空，正常道路
-	type TMap is array (64 * 64 downto 0) of TPos;	--游戏地图：高6位x，低6位y
+	type TMap is array (64*64-1 downto 0) of TPos;	--游戏地图：高6位x，低6位y
 	type TResult is (Normal, Die);					--回合结束状态：正常，死亡
 	type TStatus is (Init, Run, Pause, Die);		--游戏状态：等待开始，进行中，暂停，结束
+	function ToPosType (x: std_logic_vector(1 downto 0))
+		return TPos;
 end package;
 
 package body Functions is
+
+	function ToPosType (x: std_logic_vector(1 downto 0))
+		return TPos is
+	begin
+		case( x ) is
+			when "00" => return None;
+			when "01" => return Road;
+			when others => return None;
+		end case ;
+	end function;
+
 	function DisplayNumber (number: std_logic_vector(3 downto 0))
 		return std_logic_vector is
 	begin
