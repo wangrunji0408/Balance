@@ -7,7 +7,7 @@ entity KeyboardScancode is
 port (
 	datain, clkin : in std_logic ; -- PS2 clk and data
 	fclk, rst : in std_logic ;  -- filter clock
---	fok : out std_logic ;  -- data output enable signal
+	ok : out std_logic ;  -- data output enable signal
 	scancode : out std_logic_vector(7 downto 0) -- scan code signal output
 	) ;
 end KeyboardScancode ;
@@ -28,6 +28,7 @@ begin
 		xor code(4) xor code(5) xor code(6) xor code(7) ;
 	
 	scancode <= code when fok = '1' ;
+	ok <= fok;
 	
 	process(rst, fclk)
 	begin

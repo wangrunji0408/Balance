@@ -5,6 +5,7 @@ use work.Functions.all;
 
 entity SceneReader is
 	port (
+		clk100: in std_logic;
 		available: out std_logic;
 		scene: out TMap
 	);
@@ -24,29 +25,30 @@ architecture arch of SceneReader is
 	signal clk: std_logic;
 	signal q: std_logic_vector(0 downto 0);
 begin
-	dr: digital_rom port map (address, clk, q);
-	process
-	begin
-		clk <= '0';
-		genclk : for i in 0 to TMap'high * 8 + 100 loop
-			clk <= not clk;
-			wait for 5 ns;
-		end loop ; -- genclk
-		wait;
-	end process;
+	--dr: digital_rom port map (address, clk100, q);
 
-	process
-		variable v: std_logic_vector(1 downto 0);
+	--process
+	--	variable v: std_logic_vector(1 downto 0);
+	--begin
+	--	available <= '0';
+	--	for i in TMap'range loop
+	--		address <= std_logic_vector(to_unsigned(i, 13)) & "0";
+	--		wait until clk100 = '0'; v(0) := q(0);
+	--		address <= std_logic_vector(to_unsigned(i, 13)) & "1";
+	--		wait until clk100 = '1'; v(1) := q(0);
+	--		
+	--		v := std_logic_vector(to_unsigned(i, 2));
+	--		
+	--		scene(i) <= ToPosType(v);
+	--	end loop ;
+	--	available <= '1';
+	--	wait;
+	--end process ;
+	process(clk)
 	begin
-		available <= '0';
-		for i in TMap'range loop
-			address <= std_logic_vector(to_unsigned(i, 12)) & "0";
-			wait for 20 ns; v(0) := q(0);
-			address <= std_logic_vector(to_unsigned(i, 12)) & "1";
-			wait for 20 ns; v(1) := q(0);
-			scene(i) <= ToPosType(v);
-		end loop ;
-		available <= '1';
-		wait;
-	end process ;
+	for i in TMap'range loop
+		scene(i) <= Road;--ToPosType( std_logic_vector(to_unsigned(i, 2)) );
+	end loop;
+	end process;
+	
 end arch ; -- arch

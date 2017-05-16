@@ -1,0 +1,140 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2009 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II
+# Version 9.1 Build 222 10/21/2009 SJ Full Version
+# Date created = 10:24:15  May 16, 2017
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		vga_rom_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY "Cyclone II"
+set_global_assignment -name DEVICE EP2C70F672C8
+set_global_assignment -name TOP_LEVEL_ENTITY Top
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 9.1
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "10:24:15  MAY 16, 2017"
+set_global_assignment -name LAST_QUARTUS_VERSION 9.1
+set_global_assignment -name VHDL_FILE digital_rom.vhd
+set_global_assignment -name VHDL_FILE Functions.vhd
+set_global_assignment -name VHDL_FILE Gyro.vhd
+set_global_assignment -name VHDL_FILE Keyboard.vhd
+set_global_assignment -name VHDL_FILE Keyboard_tb.vhd
+set_global_assignment -name VHDL_FILE KeyboardScancode.vhd
+set_global_assignment -name VHDL_FILE KeyboardTest.vhd
+set_global_assignment -name VHDL_FILE Mouse.vhd
+set_global_assignment -name VHDL_FILE Physics.vhd
+set_global_assignment -name VHDL_FILE Renderer.vhd
+set_global_assignment -name VHDL_FILE SceneReader.vhd
+set_global_assignment -name VHDL_FILE StatusController.vhd
+set_global_assignment -name VHDL_FILE Top.vhd
+set_global_assignment -name VHDL_FILE VGA640480.vhd
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+set_global_assignment -name MISC_FILE "D:/src/vga_rom.dpf"
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
+set_location_assignment PIN_N2 -to clk100
+set_location_assignment PIN_AD23 -to debug_display[7][6]
+set_location_assignment PIN_AD22 -to debug_display[7][5]
+set_location_assignment PIN_AE22 -to debug_display[7][4]
+set_location_assignment PIN_AC21 -to debug_display[7][3]
+set_location_assignment PIN_AF22 -to debug_display[7][2]
+set_location_assignment PIN_AD21 -to debug_display[7][1]
+set_location_assignment PIN_AF21 -to debug_display[7][0]
+set_location_assignment PIN_AC20 -to debug_display[6][6]
+set_location_assignment PIN_AB20 -to debug_display[6][5]
+set_location_assignment PIN_AE20 -to debug_display[6][4]
+set_location_assignment PIN_AF20 -to debug_display[6][3]
+set_location_assignment PIN_AC19 -to debug_display[6][2]
+set_location_assignment PIN_AD19 -to debug_display[6][1]
+set_location_assignment PIN_AB18 -to debug_display[6][0]
+set_location_assignment PIN_AE19 -to debug_display[5][6]
+set_location_assignment PIN_AF19 -to debug_display[5][5]
+set_location_assignment PIN_AE18 -to debug_display[5][4]
+set_location_assignment PIN_AF18 -to debug_display[5][3]
+set_location_assignment PIN_AD17 -to debug_display[5][2]
+set_location_assignment PIN_AC17 -to debug_display[5][1]
+set_location_assignment PIN_AE17 -to debug_display[5][0]
+set_location_assignment PIN_AF17 -to debug_display[4][6]
+set_location_assignment PIN_AC16 -to debug_display[4][5]
+set_location_assignment PIN_AD16 -to debug_display[4][4]
+set_location_assignment PIN_AE16 -to debug_display[4][3]
+set_location_assignment PIN_AC12 -to debug_display[4][2]
+set_location_assignment PIN_AB15 -to debug_display[4][1]
+set_location_assignment PIN_AD11 -to debug_display[4][0]
+set_location_assignment PIN_AE15 -to debug_display[3][6]
+set_location_assignment PIN_AF13 -to debug_display[3][5]
+set_location_assignment PIN_AE13 -to debug_display[3][4]
+set_location_assignment PIN_AE12 -to debug_display[3][3]
+set_location_assignment PIN_AD12 -to debug_display[3][2]
+set_location_assignment PIN_AC15 -to debug_display[3][1]
+set_location_assignment PIN_AE11 -to debug_display[3][0]
+set_location_assignment PIN_AD15 -to debug_display[2][6]
+set_location_assignment PIN_AF10 -to debug_display[2][5]
+set_location_assignment PIN_AE10 -to debug_display[2][4]
+set_location_assignment PIN_AB12 -to debug_display[2][3]
+set_location_assignment PIN_AC11 -to debug_display[2][2]
+set_location_assignment PIN_AD10 -to debug_display[2][1]
+set_location_assignment PIN_AF9 -to debug_display[2][0]
+set_location_assignment PIN_AE9 -to debug_display[1][6]
+set_location_assignment PIN_AC10 -to debug_display[1][5]
+set_location_assignment PIN_AC9 -to debug_display[1][4]
+set_location_assignment PIN_AF8 -to debug_display[1][3]
+set_location_assignment PIN_AE8 -to debug_display[1][2]
+set_location_assignment PIN_AF7 -to debug_display[1][1]
+set_location_assignment PIN_AE7 -to debug_display[1][0]
+set_location_assignment PIN_AB10 -to debug_display[0][6]
+set_location_assignment PIN_AF6 -to debug_display[0][5]
+set_location_assignment PIN_AE6 -to debug_display[0][4]
+set_location_assignment PIN_AD8 -to debug_display[0][3]
+set_location_assignment PIN_AC8 -to debug_display[0][2]
+set_location_assignment PIN_AB8 -to debug_display[0][1]
+set_location_assignment PIN_AC7 -to debug_display[0][0]
+set_location_assignment PIN_AD6 -to keyboard_clk
+set_location_assignment PIN_AD7 -to keyboard_data
+set_location_assignment PIN_AC6 -to pause
+set_location_assignment PIN_AD4 -to rst
+set_location_assignment PIN_U1 -to vga_b[2]
+set_location_assignment PIN_U2 -to vga_b[1]
+set_location_assignment PIN_T4 -to vga_b[0]
+set_location_assignment PIN_T3 -to vga_g[2]
+set_location_assignment PIN_T2 -to vga_g[1]
+set_location_assignment PIN_R5 -to vga_g[0]
+set_location_assignment PIN_U3 -to vga_hs
+set_location_assignment PIN_R4 -to vga_r[2]
+set_location_assignment PIN_R3 -to vga_r[1]
+set_location_assignment PIN_R2 -to vga_r[0]
+set_location_assignment PIN_U4 -to vga_vs
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

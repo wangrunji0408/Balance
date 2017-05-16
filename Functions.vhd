@@ -7,9 +7,9 @@ package Functions is
 		return std_logic_vector;
 	subtype DisplayCode is std_logic_vector(6 downto 0);
 	type DisplayNums is array (7 downto 0) of DisplayCode;
-	type TPos is (None, Road);						--地图每格类型：空，正常道路
-	type TMap is array (64*64-1 downto 0) of TPos;	--游戏地图：高6位x，低6位y
-	type TResult is (Normal, Die);					--回合结束状态：正常，死亡
+	type TPos is (None, Road, Terminal);						--地图每格类型：空，正常道路
+	type TMap is array (32*32-1 downto 0) of TPos;	--游戏地图：高6位x，低6位y
+	type TResult is (Normal, Die, Win);					--回合结束状态：正常，死亡，赢
 	type TStatus is (Init, Run, Pause, Die);		--游戏状态：等待开始，进行中，暂停，结束
 	function ToPosType (x: std_logic_vector(1 downto 0))
 		return TPos;
@@ -23,6 +23,7 @@ package body Functions is
 		case( x ) is
 			when "00" => return None;
 			when "01" => return Road;
+			when "10" => return Terminal;
 			when others => return None;
 		end case ;
 	end function;
