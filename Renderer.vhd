@@ -11,6 +11,7 @@ entity Renderer is
 		scene: in TMap;			--地图信息
 		unit_size: in natural; 	--每格的边长
 		ball_radius: in natural;--球的半径
+		scale: in natural;
 		px, py: in integer; 	--位置
 		score: in integer; 		--分数
 		status: in TStatus;		--游戏状态
@@ -25,8 +26,8 @@ architecture arch of Renderer is
 	signal sceneX, sceneY, distance, temp_scene: integer;
 
 begin
-	temp_x <= conv_integer(pixel_x);
-	temp_y <= conv_integer(pixel_y);
+	temp_x <= conv_integer(pixel_x) * scale;
+	temp_y <= conv_integer(pixel_y) * scale;
 	sceneX <= temp_x / unit_size;
 	sceneY <= temp_y / unit_size;
 	temp_scene <= sceneX * 64 + sceneY;

@@ -46,6 +46,7 @@ architecture arch of Top is
 	end component;
 	component SceneReader is
 	port (
+		clk100, rst: in std_logic;
 		available: out std_logic;
 		scene: out TMap
 	);
@@ -67,6 +68,7 @@ architecture arch of Top is
 		scene: in TMap;			--地图信息
 		unit_size: in natural; 	--每格的边长
 		ball_radius: in natural;--球的半径
+		scale: in natural;
 		px, py: in integer; 	--位置
 		score: in integer; 		--分数
 		status: in TStatus;		--游戏状态
@@ -100,8 +102,9 @@ architecture arch of Top is
 	signal scene: TMap;
 	signal scene_available: std_logic := '0';
 	signal result: TResult;
-	constant unit_size: natural := 20;
-	constant ball_radius: natural := 5;
+	constant unit_size: natural := 100;
+	constant ball_radius: natural := 25;
+	constant scale: natural := 5;
 	
 	-- for debug:
 	signal scancode : std_logic_vector(7 downto 0);
@@ -114,8 +117,8 @@ begin
 	u0: KeyboardScancode port map(keyboard_data, keyboard_clk, clk100, not rst, scancode);
 	ktw: KeyboardToWASD port map (keyboard_data, keyboard_clk, clk100, not rst, w, a, s, d);
 	wta: WASDToAcc port map (w, a, s, d, ax, ay);
-	reader: SceneReader port map (scene_available, scene);
-	phy: Physics port map (clk60, rst, '1', scene, unit_size, ball_radius, ax, ay, px, py, add_score, result);
+	reader: SceneReader port map (clk100, rst, scene_available, scene);
+	phy: Physics port map (clk60, rst, pause, scene, unit_size, ball_radius, ax, ay, px, py, add_score, result);
 	vga: vga640480 port map (
 		reset => rst,
 		clk100 => clk100,
@@ -136,6 +139,7 @@ begin
 		scene => scene,
 		unit_size => unit_size,
 		ball_radius => ball_radius,
+		scale => scale,
 		px => px, py => py,
 		score => 0,
 		status => Init,
