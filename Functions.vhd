@@ -7,12 +7,14 @@ package Functions is
 		return std_logic_vector;
 	subtype DisplayCode is std_logic_vector(6 downto 0);
 	type DisplayNums is array (7 downto 0) of DisplayCode;
-	type TPos is (None, Road, Terminal);						--地图每格类型：空，正常道路
-	type TMap is array (64*64-1 downto 0) of TPos;	--游戏地图：高6位x，低6位y
+	type TPos is (None, Road, Terminal, Wall, Start);		--地图每格类型：空，正常道路
+	type TMap is array (16*16-1 downto 0) of TPos;	--游戏地图：高6位x，低6位y
 	type TResult is (Normal, Die, Win);					--回合结束状态：正常，死亡，赢
-	type TStatus is (Init, Run, Pause, Die);		--游戏状态：等待开始，进行中，暂停，结束
-	function ToPosType (x: std_logic_vector(3 downto 0))
-		return TPos;
+	type TStatus is (Init, Run, Pause, Gameover);		--游戏状态：等待开始，进行中，暂停，结束
+	subtype TColor is std_logic_vector(8 downto 0); 	--颜色：[R2R1R0 G2G1G0 B2B1B0]
+	function ToPosType (x: std_logic_vector(3 downto 0)) return TPos;
+	function PosTypeToNum (t: TPos) return std_logic_vector;
+	function ToColor (t: TPos) return TColor;
 end package;
 
 package body Functions is
@@ -24,7 +26,35 @@ package body Functions is
 			when "0000" => return None;
 			when "0001" => return Road;
 			when "0010" => return Terminal;
+			when "0011" => return Wall;
+			when "0100" => return Start;
 			when others => return None;
+		end case ;
+	end function;
+
+	function PosTypeToNum (t: TPos)
+		return std_logic_vector is
+	begin
+		case( t ) is
+			when None => return "0000";
+			when Road => return "0001";
+			when Terminal => return "0010";
+			when Wall => return "0011";
+			when Start => return "0100";
+			when others => return "1111";
+		end case ;
+	end function;
+	
+	function ToColor (t: TPos)
+		return TColor is
+	begin
+		case( t ) is
+			when None => return "000000000";
+			when Road => return "010010010";
+			when Terminal => return "111000000";
+			when Wall => return "000111000";
+			when Start => return "010010010";
+			when others => return "000000111";
 		end case ;
 	end function;
 

@@ -48,7 +48,8 @@ architecture arch of Top is
 	port (
 		clk100, rst: in std_logic;
 		available: out std_logic;
-		scene: out TMap
+		scene: out TMap;
+		start_x, start_y: out natural
 	);
 	end component;
 	component vga640480 is
@@ -75,41 +76,48 @@ architecture arch of Top is
 		
 		vga_clk: in std_logic;	--VGA端的时钟，25MHz
 		pixel_x, pixel_y: in std_logic_vector(9 downto 0);	--查询像素的坐标
-		r, g, b: out std_logic_vector(2 downto 0)			--输出像素颜色
+		rgb: out TColor											--输出像素颜色
 	);
 	end component;
 	
 	component Physics is
 	port (
-		clk, rst, pause: in std_logic;	--游戏端时�?0Hz，复位（恢复初态），暂停（0为暂停，1为正常）
+		clk, rst, pause: in std_logic;	--游戏端时�?0Hz，复位（恢复初态），暂停（0为暂停，1为正常）
 		scene: in TMap;			--地图信息
-		unit_size: in natural; 	--每格的边�?
+		start_x, start_y: in natural;
+		unit_size: in natural; 	--每格的边�?
 		ball_radius: in natural;--球的半径
 		ax, ay: in integer; 	--加速度
 		
 		px, py: buffer integer; 	--位置
 		add_score: out integer; 	--加分
-		result: buffer TResult		--结果
+		result: buffer TResult;		--结果
+		
+		sx, sy: out natural;
+		nowt: out TPos 
 	);
 	end component;
 	
 	signal ax, ay, vx, vy, px, py, add_score: integer;
+	signal start_x, start_y: natural;
 	signal w, a, s, d: std_logic;
 	signal vga_vs_temp: std_logic;
-	signal r, g, b: std_logic_vector(2 downto 0);
+	signal color: TColor;
 	signal clk25, clk60: std_logic;
 	signal vga_x, vga_y: std_logic_vector(9 downto 0);
 	signal scene: TMap;
 	signal scene_available: std_logic := '0';
 	signal result: TResult;
-	constant unit_size: natural := 100;
-	constant ball_radius: natural := 25;
+	constant unit_size: natural := 50;
+	constant ball_radius: natural := 20;
 	constant scale: natural := 5;
 	
 	-- for debug:
 	signal scancode : std_logic_vector(7 downto 0);
 	signal result_num: std_logic_vector(3 downto 0); 
 	signal px_vec, py_vec: std_logic_vector(11 downto 0);
+	signal nowt: TPos;
+	signal sx, sy: natural;
 begin
 	clk60 <= vga_vs_temp;
 	vga_vs <= vga_vs_temp;
@@ -117,16 +125,16 @@ begin
 	u0: KeyboardScancode port map(keyboard_data, keyboard_clk, clk100, not rst, scancode);
 	ktw: KeyboardToWASD port map (keyboard_data, keyboard_clk, clk100, not rst, w, a, s, d);
 	wta: WASDToAcc port map (w, a, s, d, ax, ay);
-	reader: SceneReader port map (clk100, rst, scene_available, scene);
-	phy: Physics port map (clk60, rst, pause, scene, unit_size, ball_radius, ax, ay, px, py, add_score, result);
+	reader: SceneReader port map (clk100, rst, scene_available, scene, start_x, start_y);
+	phy: Physics port map (clk60, rst, pause, scene, start_x, start_y, unit_size, ball_radius, ax, ay, px, py, add_score, result, sx, sy, nowt);
 	vga: vga640480 port map (
 		reset => rst,
 		clk100 => clk100,
 		x => vga_x,
 		y => vga_y,
-		r_in => r,
-		g_in => g,
-		b_in => b,
+		r_in => color(8 downto 6),
+		g_in => color(5 downto 3),
+		b_in => color(2 downto 0),
 		clk25 => clk25,
 		hs => vga_hs,
 		vs => vga_vs_temp,
@@ -146,7 +154,7 @@ begin
 		
 		vga_clk => clk25,
 		pixel_x => vga_x, pixel_y => vga_y,
-		r => r, g => g, b => b
+		rgb => color
 	);
 	
 	result_num <= "0000" when result = Normal else
@@ -156,14 +164,9 @@ begin
 	
 	px_vec <= std_logic_vector( to_unsigned(px, 12) );
 	py_vec <= std_logic_vector( to_unsigned(py, 12) );
-	debug_display(7) <= DisplayNumber( px_vec(11 downto 8) );
-	debug_display(6) <= DisplayNumber( px_vec(7 downto 4) );
-	debug_display(5) <= DisplayNumber( px_vec(3 downto 0) );
-	
-	debug_display(4) <= DisplayNumber( py_vec(11 downto 8) );
-	debug_display(3) <= DisplayNumber( py_vec(7 downto 4) );
-	debug_display(2) <= DisplayNumber( py_vec(3 downto 0) );
-	--debug_display(5) <= DisplayNumber( result_num );
+	debug_display(7) <= DisplayNumber( PosTypeToNum(nowt) );
+	debug_display(6) <= DisplayNumber( std_logic_vector( to_unsigned(sx, 4) ) );
+	debug_display(5) <= DisplayNumber( std_logic_vector( to_unsigned(sy, 4) ) );
 
 	--debug_display(3) <= DisplayNumber( "000" & rst );
 	--debug_display(2) <= DisplayNumber( "000" & pause );

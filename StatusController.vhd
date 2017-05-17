@@ -7,9 +7,29 @@ use work.Functions.all;
 entity StatusController is
 	port (
 		clk: in std_logic;			--游戏端时钟，60Hz
-		rst, pause: in std_logic;	--复位，暂停按钮
+		rst, pause_in: in std_logic;	--复位，暂停按钮
 		result: in TResult;			--回合结束状态
 		status: buffer TStatus;		--游戏状态
 		phy_rst, phy_pause: out std_logic --控制物理引擎的复位、暂停（当前是直接与按钮关联，未来可能有变）
 	);
 end entity;
+
+architecture arch of StatusController is
+begin
+	phy_rst <= rst;
+	phy_pause <= pause_in;
+	process( clk, rst )
+	begin
+		if rst = '0' then
+			status <= Init;
+		elsif rising_edge(clk) then
+			if pause_in = '0' then
+				status <= Pause;
+			elsif result = Die or result = Win then
+				status <= Gameover;
+			else
+				status <= Run;
+			end if;
+		end if;
+	end process ;
+end arch ; -- arch

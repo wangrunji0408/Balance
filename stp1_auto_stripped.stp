@@ -4,16 +4,7 @@
   </display_tree>
   <instance entity_name="sld_signaltap" is_auto_node="yes" is_expanded="true" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
     <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
-    <position_info>
-      <single attribute="active tab" value="1"/>
-      <single attribute="data vertical scroll position" value="0"/>
-      <single attribute="data horizontal scroll position" value="0"/>
-      <single attribute="zoom level numerator" value="1"/>
-      <single attribute="zoom level denominator" value="1"/>
-      <single attribute="zoom offset numerator" value="130944"/>
-      <single attribute="zoom offset denominator" value="1"/>
-    </position_info>
-    <signal_set global_temp="1" name="signal_set: 2017/05/17 14:50:36  #0">
+    <signal_set global_temp="1" is_expanded="true" name="signal_set: 2017/05/17 14:50:36  #0">
       <clock name="clk100" polarity="posedge" tap_mode="probeonly"/>
       <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="128" trigger_in_enable="no" trigger_out_enable="no"/>
       <top_entity/>
@@ -491,7 +482,7 @@
         <trigger_in_editor/>
         <trigger_out_editor/>
       </presentation>
-      <trigger attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2017/05/17 14:50:36  #1" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_type="circular">
+      <trigger CRC="3EAFAFD9" attribute_mem_mode="false" gap_record="true" global_temp="1" is_expanded="true" name="trigger: 2017/05/17 14:50:36  #1" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_type="circular">
         <power_up_trigger position="pre" storage_qualifier_disabled="no"/>
         <events use_custom_flow_control="no">
           <level enabled="yes" name="condition1" type="basic">
@@ -522,20 +513,29 @@
         </storage_qualifier_events>
       </trigger>
     </signal_set>
+    <position_info>
+      <single attribute="active tab" value="1"/>
+      <single attribute="data horizontal scroll position" value="0"/>
+      <single attribute="data vertical scroll position" value="0"/>
+      <single attribute="zoom level denominator" value="1"/>
+      <single attribute="zoom level numerator" value="1"/>
+      <single attribute="zoom offset denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="130944"/>
+    </position_info>
   </instance>
   <mnemonics/>
+  <static_plugin_mnemonics/>
   <global_info>
     <single attribute="active instance" value="0"/>
+    <single attribute="config widget visible" value="1"/>
+    <single attribute="data log widget visible" value="1"/>
+    <single attribute="hierarchy widget visible" value="1"/>
+    <single attribute="instance widget visible" value="1"/>
+    <single attribute="jtag widget visible" value="1"/>
     <single attribute="lock mode" value="36110"/>
-    <multi attribute="window position" size="9" value="1424,683,398,124,356,50,124,0,51"/>
     <multi attribute="column width" size="23" value="34,34,257,74,68,70,88,88,98,98,88,88,170,101,101,101,101,101,101,101,101,107,78"/>
     <multi attribute="frame size" size="2" value="2560,1475"/>
-    <single attribute="jtag widget visible" value="1"/>
     <multi attribute="jtag widget size" size="2" value="473,205"/>
-    <single attribute="instance widget visible" value="1"/>
-    <single attribute="config widget visible" value="1"/>
-    <single attribute="hierarchy widget visible" value="1"/>
-    <single attribute="data log widget visible" value="1"/>
+    <multi attribute="window position" size="9" value="1424,683,398,124,356,50,124,0,51"/>
   </global_info>
-  <static_plugin_mnemonics/>
 </session>
