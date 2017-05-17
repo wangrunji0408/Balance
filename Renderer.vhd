@@ -12,7 +12,8 @@ entity Renderer is
 		unit_size: in natural; 	--每格的边长
 		ball_radius: in natural;--球的半径
 		scale: in natural;
-		px, py: in integer; 	--位置
+		px, py: in integer; 		--位置
+		px1, py1: in integer; 	--位置
 		score: in integer; 		--分数
 		status: in TStatus;		--游戏状态
 		
@@ -24,7 +25,7 @@ end entity;
 
 architecture arch of Renderer is
 	signal temp_x, temp_y: integer;
-	signal sceneX, sceneY, distance, temp_scene: integer;
+	signal sceneX, sceneY, distance, distance1, temp_scene: integer;
 
 begin
 	temp_x <= conv_integer(pixel_x) * scale;
@@ -33,11 +34,14 @@ begin
 	sceneY <= temp_y / unit_size;
 	temp_scene <= sceneX * 16 + sceneY;
 	distance <= (temp_x - px) * (temp_x - px) + (temp_y - py) * (temp_y - py);
+	distance1 <= (temp_x - px1) * (temp_x - px1) + (temp_y - py1) * (temp_y - py1);
 	process(vga_clk)
 	begin
 		if rising_edge(vga_clk) then
 			if ball_radius * ball_radius >= distance then
 				rgb <= "111111111";
+			elsif ball_radius * ball_radius >= distance1 then
+				rgb <= "110110110";
 			else
 				rgb <= ToColor( scene(temp_scene) );
 			end if;

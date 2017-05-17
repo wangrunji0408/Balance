@@ -35,7 +35,7 @@ architecture arch of Top is
 		port (
 			ps2_data, ps2_clk: in std_logic;
 			clk, rst: in std_logic;
-			w, a, s, d: out std_logic
+			w, a, s, d, up, left, down, right: out std_logic
 		);
 	end component;
 	component WASDToAcc is
@@ -71,6 +71,7 @@ architecture arch of Top is
 		ball_radius: in natural;--球的半径
 		scale: in natural;
 		px, py: in integer; 	--位置
+		px1, py1: in integer; 	--位置
 		score: in integer; 		--分数
 		status: in TStatus;		--游戏状态
 		
@@ -98,16 +99,17 @@ architecture arch of Top is
 	);
 	end component;
 	
-	signal ax, ay, vx, vy, px, py, add_score: integer;
+	signal ax, ay, px, py, add_score: integer;
+	signal ax1, ay1, px1, py1, add_score1: integer;
 	signal start_x, start_y: natural;
-	signal w, a, s, d: std_logic;
+	signal w, a, s, d, w1, a1, s1, d1: std_logic;
 	signal vga_vs_temp: std_logic;
 	signal color: TColor;
 	signal clk25, clk60: std_logic;
 	signal vga_x, vga_y: std_logic_vector(9 downto 0);
 	signal scene: TMap;
 	signal scene_available: std_logic := '0';
-	signal result: TResult;
+	signal result, result1: TResult;
 	constant unit_size: natural := 50;
 	constant ball_radius: natural := 20;
 	constant scale: natural := 5;
@@ -123,10 +125,12 @@ begin
 	vga_vs <= vga_vs_temp;
 	
 	u0: KeyboardScancode port map(keyboard_data, keyboard_clk, clk100, not rst, scancode);
-	ktw: KeyboardToWASD port map (keyboard_data, keyboard_clk, clk100, not rst, w, a, s, d);
-	wta: WASDToAcc port map (w, a, s, d, ax, ay);
+	ktw: KeyboardToWASD port map (keyboard_data, keyboard_clk, clk100, not rst, w, a, s, d, w1, a1, s1, d1);
+	wta0: WASDToAcc port map (w, a, s, d, ax, ay);
+	wta1: WASDToAcc port map (w1, a1, s1, d1, ax1, ay1);
 	reader: SceneReader port map (clk100, rst, scene_available, scene, start_x, start_y);
 	phy: Physics port map (clk60, rst, pause, scene, start_x, start_y, unit_size, ball_radius, ax, ay, px, py, add_score, result, sx, sy, nowt);
+	phy1: Physics port map (clk60, rst, pause, scene, start_x, start_y, unit_size, ball_radius, ax1, ay1, px1, py1, add_score1, result1);
 	vga: vga640480 port map (
 		reset => rst,
 		clk100 => clk100,
@@ -149,6 +153,7 @@ begin
 		ball_radius => ball_radius,
 		scale => scale,
 		px => px, py => py,
+		px1 => px1, py1 => py1,
 		score => 0,
 		status => Init,
 		

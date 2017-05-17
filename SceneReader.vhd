@@ -24,10 +24,10 @@ architecture arch of SceneReader is
 
 	signal address: std_logic_vector(11 downto 0);
 	signal q: std_logic_vector(3 downto 0);
-	
+	signal q_type: TPos;
 begin
 	rrr: rom port map (address, clk100, q);
-	
+	q_type <= ToPosType(q);
 	process(rst, clk100)
 		variable i: TMap'range := 0;
 	begin
@@ -36,8 +36,8 @@ begin
 			available <= '0';
 		elsif rising_edge(clk100) then
 			address <= std_logic_vector(to_unsigned(i, 12));
-			scene(i) <= ToPosType(q);
-			if ToPosType(q) = Start then
+			scene(i) <= q_type;
+			if q_type = Start then
 				start_x <= i / 16;
 				start_y <= to_integer(to_unsigned(i, 4));
 			end if;
