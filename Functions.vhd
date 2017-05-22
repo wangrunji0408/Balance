@@ -1,10 +1,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use ieee.numeric_std.all;
 
 package Functions is
 	-- FGPA平台显示译码器顺序
-	function DisplayNumber (number: std_logic_vector(3 downto 0))
-		return std_logic_vector;
+	function DisplayNumber (number: unsigned(3 downto 0)) return std_logic_vector;
+	function DisplayNumber (number: integer) return std_logic_vector;
 	subtype DisplayCode is std_logic_vector(6 downto 0);
 	type DisplayNums is array (7 downto 0) of DisplayCode;
 	type TPos is (None, Road, Terminal, Wall, Start);		--地图每格类型：空，正常道路
@@ -58,7 +59,7 @@ package body Functions is
 		end case ;
 	end function;
 
-	function DisplayNumber (number: std_logic_vector(3 downto 0))
+	function DisplayNumber (number: unsigned(3 downto 0))
 		return std_logic_vector is
 	begin
 		case number is
@@ -80,5 +81,11 @@ package body Functions is
 			when "1111" => return "1111000"; --F;
 			when others => return "0000000";
 		end case;
+	end function;
+	
+	function DisplayNumber (number: integer)
+		return std_logic_vector is
+	begin
+		return DisplayNumber(to_unsigned(number, 4));
 	end function;
 end package body;

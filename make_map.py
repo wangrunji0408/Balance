@@ -22,8 +22,8 @@ mif.writelines(['WIDTH=4;\n', 'DEPTH=%d;\n' % (m * n), 'ADDRESS_RADIX=HEX;\n', '
 mif.write('\n')
 mif.write('CONTENT BEGIN\n')
 k = 0
-for j in range(n):
-	for i in range(m):
+for i in range(m):
+	for j in range(n):
 		mif.write('\t%03X : %x;\n' % (k, colorToType( image[i, j] )))
 		k += 1
 mif.write('END;\n')

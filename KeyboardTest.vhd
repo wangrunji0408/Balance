@@ -1,7 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-USE ieee.std_logic_unsigned.all;
-use ieee.std_logic_arith.all;
+use ieee.numeric_std.all;
 use work.Functions.all;
 
 entity KeyboardTest is
@@ -28,8 +27,8 @@ begin
 rst<=not rst_in;
 
 u0: KeyboardScancode port map(datain,clkin,fclk,rst,scancode);
-seg0 <= DisplayNumber(scancode(3 downto 0));
-seg1 <= DisplayNumber(scancode(7 downto 4));
+seg0 <= DisplayNumber(unsigned(scancode(3 downto 0)));
+seg1 <= DisplayNumber(unsigned(scancode(7 downto 4)));
 
 end behave;
 

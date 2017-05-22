@@ -6,43 +6,51 @@ use work.Functions.all;
 entity SceneReader is
 	port (
 		clk100, rst: in std_logic;
-		available: out std_logic;
-		scene: out TMap;
-		start_x, start_y: out natural
+		x1, y1, x2, y2: in natural range 0 to 15;	-- 坐标
+		p1, p2: out TPos;  							-- 类型
+		start_x, start_y: out natural range 0 to 15	-- 起始点
 	);
 end entity;
 
 architecture arch of SceneReader is
-	component rom IS
-	PORT
-	(
-		address		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
-		clock		: IN STD_LOGIC ;
-		q		: OUT STD_LOGIC_VECTOR (3 DOWNTO 0)
-	);
+	component SceneROM IS
+		PORT
+		(
+			address_a		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
+			address_b		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
+			clock		: IN STD_LOGIC;
+			q_a		: OUT STD_LOGIC_VECTOR (3 DOWNTO 0);
+			q_b		: OUT STD_LOGIC_VECTOR (3 DOWNTO 0)
+		);
 	END component;
 
-	signal address: std_logic_vector(11 downto 0);
-	signal q: std_logic_vector(3 downto 0);
-	signal q_type: TPos;
+	signal address0, address1, address2: std_logic_vector(11 downto 0);
+	signal q1, q2: std_logic_vector(3 downto 0);
+	signal initing: boolean := true;
+	signal p0: TPos;
 begin
-	rrr: rom port map (address, clk100, q);
-	q_type <= ToPosType(q);
+	rom: SceneROM port map (address1, address2, clk100, q1, q2);
+	address1 <= std_logic_vector(to_unsigned(y1 * 16 + x1, 12));
+	address2 <= std_logic_vector(to_unsigned(y2 * 16 + x2, 12)) when not initing else address0;
+	p1 <= ToPosType(q1);
+	p0 <= ToPosType(q2);
+	p2 <= p0;
+
+	-- 临时占用端口2进行初始化
 	process(rst, clk100)
-		variable i: TMap'range := 0;
+		variable i: natural range 0 to 16*16-1 := 0;
 	begin
 		if rst = '0' then
 			i := 0;
-			available <= '0';
+			initing <= true;
 		elsif rising_edge(clk100) then
-			address <= std_logic_vector(to_unsigned(i, 12));
-			scene(i) <= q_type;
-			if q_type = Start then
+			address0 <= std_logic_vector(to_unsigned(i, 12));
+			if p0 = Start then
 				start_x <= i / 16;
 				start_y <= to_integer(to_unsigned(i, 4));
 			end if;
 			i := i + 1;
-			if i = TMap'high then available <= '1'; end if;
+			if i = 16*16-1 then initing <= false; end if;
 		end if;
 	end process;
 	

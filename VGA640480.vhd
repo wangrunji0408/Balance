@@ -2,13 +2,14 @@ library	ieee;
 use		ieee.std_logic_1164.all;
 use		ieee.std_logic_unsigned.all;
 use		ieee.std_logic_arith.all;
+use		work.Functions.all;
 
 entity vga640480 is
 	 port(
 			reset       :         in  STD_LOGIC;
 			clk100      :         in  STD_LOGIC; --100M时钟输入
 			x, y		:		  out std_logic_vector(9 downto 0); --输出当前要绘制的像素位置
-			r_in, g_in, b_in :    in std_logic_vector(2 downto 0); --输入给定像素位置的颜色
+			color_in :    		in TColor; --输入给定像素位置的颜色
 			clk25       :		  out std_logic; --输出25MHz工作时钟
 			hs,vs       :         out STD_LOGIC; --行同步、场同步信号
 			r,g,b       :         out STD_LOGIC_vector(2 downto 0) --输出的颜色信号
@@ -129,9 +130,9 @@ begin
 		elsif(clk'event and clk='1')then
 			-- 如果在显示范围内，则从外部读取颜色值输出，否则输出0
 		 	if vector_x >= 0 and vector_x < 640 and vector_y >= 0 and vector_y < 480 then
-				r1 <= r_in;
-				g1 <= g_in;
-				b1 <= b_in;
+				r1 <= color_in(8 downto 6);
+				g1 <= color_in(5 downto 3);
+				b1 <= color_in(2 downto 0);
 			else
 				r1  <= "000";
 				g1	<= "000";
