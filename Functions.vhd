@@ -9,16 +9,30 @@ package Functions is
 	subtype DisplayCode is std_logic_vector(6 downto 0);
 	type DisplayNums is array (7 downto 0) of DisplayCode;
 	type TPos is (None, Road, Terminal, Wall, Start);		--地图每格类型：空，正常道路
-	type TMap is array (16*16-1 downto 0) of TPos;	--游戏地图：高6位x，低6位y
 	type TResult is (Normal, Die, Win);					--回合结束状态：正常，死亡，赢
 	type TStatus is (Init, Run, Pause, Gameover);		--游戏状态：等待开始，进行中，暂停，结束
 	subtype TColor is std_logic_vector(8 downto 0); 	--颜色：[R2R1R0 G2G1G0 B2B1B0]
 	function ToPosType (x: std_logic_vector(3 downto 0)) return TPos;
 	function PosTypeToNum (t: TPos) return std_logic_vector;
 	function ToColor (t: TPos) return TColor;
+	function ToCharId (c: character) return natural;
 end package;
 
 package body Functions is
+
+	function ToCharId (c: character) return natural is
+		constant ascii: natural := CHARACTER'POS(c);
+	begin
+		if ascii >= CHARACTER'POS('A') and ascii <= CHARACTER'POS('Z') then 
+			return 0 + ascii - CHARACTER'POS('A');
+		elsif ascii >= CHARACTER'POS('a') and ascii <= CHARACTER'POS('z') then 
+			return 26 + ascii - CHARACTER'POS('z');
+		elsif ascii >= CHARACTER'POS('0') and ascii <= CHARACTER'POS('9') then 
+			return 52 + ascii - CHARACTER'POS('0');
+		else
+			return 63;
+		end if;
+	end function;
 
 	function ToPosType (x: std_logic_vector(3 downto 0))
 		return TPos is

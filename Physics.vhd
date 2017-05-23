@@ -13,13 +13,14 @@ entity Physics is
 		query_sx, query_sy: out natural range 0 to 15;
 		pos_type: in TPos;
 		start_x, start_y: in natural range 0 to 15;
+		ready: in std_logic;
 		
 		unit_size: in natural; 	--每格的边长
 		ball_radius: in natural;--球的半径
 		ax, ay: in integer; 	--加速度
 		
 		px, py: buffer integer; 	--位置
-		add_score: out integer; 	--加分
+		score: buffer integer; 			--分
 		result: buffer TResult;		--结果
 		
 		sx, sy: buffer natural
@@ -46,17 +47,21 @@ begin
 	temp_type <= pos_type;
 	
 	process(clk60)
+		variable last_ready: std_logic := '0';
 	begin
 		if rst = '0' then
-			px <= start_x * unit_size + unit_size / 2;
-			py <= start_y * unit_size + unit_size / 2;
+			px <= 0;
+			py <= 0;
 			vx <= 0;
 			vy <= 0;
-			add_score <= 0;
+			score <= 0;
 			result <= Normal;
 		elsif rising_edge(clk60) then
-			if pause = '0' or result = Die or result = Win then
-				add_score <= 0;
+			if last_ready = '0' and ready = '1' then
+				px <= start_x * unit_size + unit_size / 2;
+				py <= start_y * unit_size + unit_size / 2;
+			elsif pause = '0' or result = Die or result = Win then
+				
 			else
 				px <= temp_px;
 				py <= temp_py;
@@ -66,14 +71,14 @@ begin
 				sy <= temp_sceneY;
 				if temp_type = None then
 					result <= Die;
-					add_score <= 0;
 				elsif temp_type = terminal then
 					result <= Win;
-					add_score <= 1;
+					score <= score + 1;
 				else
-					add_score <= 1;
+					score <= score + 1;
 				end if;
 			end if;
+			last_ready := ready;
 		end if;
 	end process;
 

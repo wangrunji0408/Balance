@@ -67,6 +67,9 @@ architecture arch of Top is
 			rgb: out TColor					--输出像素颜色
 		);
 	end component;
+
+	for all: Renderer use entity work.Renderer(game);
+	--for all: Renderer use entity work.Renderer(test_image_font);
 	
 	component Physics is
 		port (
@@ -76,13 +79,14 @@ architecture arch of Top is
 			query_sx, query_sy: out natural range 0 to 15;
 			pos_type: in TPos;
 			start_x, start_y: in natural range 0 to 15;
+			ready: in std_logic;
 			
 			unit_size: in natural; 	--每格的边长
 			ball_radius: in natural;--球的半径
 			ax, ay: in integer; 	--加速度
 			
 			px, py: buffer integer; 	--位置
-			add_score: out integer; 	--加分
+			score: buffer integer; 	--分
 			result: buffer TResult;		--结果
 			
 			sx, sy: buffer natural
@@ -104,12 +108,13 @@ architecture arch of Top is
 		clk100, rst: in std_logic;
 		x1, y1, x2, y2: in natural range 0 to 15;	-- 坐标
 		p1, p2: out TPos;  							-- 类型
-		start_x, start_y: out natural range 0 to 15	-- 起始点
+		start_x, start_y: out natural range 0 to 15;	-- 起始点
+		ready: out std_logic
 	);
 	end component;
 	
-	signal ax, ay, px, py, add_score: integer;
-	signal ax1, ay1, px1, py1, add_score1: integer;
+	signal ax, ay, px, py, score: integer;
+	signal ax1, ay1, px1, py1, score1: integer;
 	signal start_x, start_y: natural;
 	signal w, a, s, d, w1, a1, s1, d1: std_logic;
 	signal vga_vs_temp: std_logic;
@@ -122,6 +127,7 @@ architecture arch of Top is
 	constant scale: natural := 5;
 	signal status: TStatus := Init;
 	signal phy_rst, phy_pause: std_logic;
+	signal ready: std_logic;
 	
 	signal physics_sx, physics_sy: natural range 0 to 15;
 	signal physics_pos_type: TPos;
@@ -140,10 +146,10 @@ begin
 	wta0: WASDToAcc port map (w, a, s, d, ax, ay);
 	wta1: WASDToAcc port map (w1, a1, s1, d1, ax1, ay1);
 	reader: SceneReader port map (clk100, rst, physics_sx, physics_sy, renderer_sx, renderer_sy,
-					physics_pos_type, renderer_pos_type, start_x, start_y);
+					physics_pos_type, renderer_pos_type, start_x, start_y, ready);
 	phy: Physics port map (clk60, clk100, phy_rst, phy_pause, 
-									physics_sx, physics_sy, physics_pos_type, start_x, start_y,
-									unit_size, ball_radius, ax, ay, px, py, add_score, result, sx, sy);
+									physics_sx, physics_sy, physics_pos_type, start_x, start_y, ready,
+									unit_size, ball_radius, ax, ay, px, py, score, result, sx, sy);
 	ctrl: StatusController port map (clk60, rst, pause, result, status, phy_rst, phy_pause);
 	vga: vga640480 port map (rst, clk100, vga_x, vga_y, color, clk25, vga_hs, vga_vs_temp, vga_r, vga_g, vga_b);
 	ren: Renderer port map (
@@ -156,7 +162,7 @@ begin
 		scale => scale,
 		px => px, py => py,
 		px1 => px1, py1 => py1,
-		score => 0,
+		score => score,
 		status => Init,
 		vga_clk => clk25,
 		pixel_x => to_integer(unsigned(vga_x)),
@@ -172,8 +178,8 @@ begin
 	px_vec <= std_logic_vector( to_unsigned(px, 12) );
 	py_vec <= std_logic_vector( to_unsigned(py, 12) );
 	--debug_display(7) <= DisplayNumber( PosTypeToNum(nowt) );
-	debug_display(6) <= DisplayNumber(sx);
-	debug_display(5) <= DisplayNumber(sy);
+	debug_display(6) <= DisplayNumber(start_x);
+	debug_display(5) <= DisplayNumber(start_y);
 
 	--debug_display(3) <= DisplayNumber( "000" & rst );
 	--debug_display(2) <= DisplayNumber( "000" & pause );

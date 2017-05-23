@@ -16,17 +16,19 @@ end entity;
 
 architecture arch of FontReader is
 	component FontROM IS
-	PORT
-	(
-		address		: IN STD_LOGIC_VECTOR (5 DOWNTO 0); -- [编号6][y4][x4]
-		clock		: IN STD_LOGIC  := '1';
-		q		: OUT STD_LOGIC_VECTOR (255 DOWNTO 0)
-	);
+		PORT
+		(
+			address		: IN STD_LOGIC_VECTOR (13 DOWNTO 0);
+			clock		: IN STD_LOGIC  := '1';
+			q		: OUT STD_LOGIC_VECTOR (0 DOWNTO 0)
+		);
 	END component;
-	signal address : STD_LOGIC_VECTOR (5 DOWNTO 0);
-	signal q: STD_LOGIC_VECTOR (255 DOWNTO 0);
+	signal address : STD_LOGIC_VECTOR (13 DOWNTO 0);
+	signal q		: STD_LOGIC_VECTOR (0 DOWNTO 0);
 begin
 	rom: FontROM port map (address, clk, q);
-	address <= std_logic_vector(to_unsigned(id, 6));
-	b <= q(y * 16 + x);
+	address <= std_logic_vector(to_unsigned(id, 6)) 
+				& std_logic_vector(to_unsigned(x, 4))
+				& std_logic_vector(to_unsigned(y, 4));
+	b <= q(0);
 end arch ; -- arch

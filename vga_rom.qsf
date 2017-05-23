@@ -149,7 +149,8 @@ set_global_assignment -name VHDL_FILE SceneReader.vhd
 set_global_assignment -name VHDL_FILE StatusController.vhd
 set_global_assignment -name VHDL_FILE Top.vhd
 set_global_assignment -name VHDL_FILE VGA640480.vhd
-set_global_assignment -name QIP_FILE FontROM.qip
 set_global_assignment -name QIP_FILE SceneROM.qip
 set_global_assignment -name QIP_FILE ImageROM.qip
+set_global_assignment -name QIP_FILE FontROM.qip
+set_global_assignment -name VHDL_FILE Layer.vhd
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

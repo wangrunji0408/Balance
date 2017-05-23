@@ -13,10 +13,10 @@ mif.writelines(['WIDTH=1;\n', 'DEPTH=%d;\n' % (64*16*16), 'ADDRESS_RADIX=HEX;\n'
 mif.write('\n')
 mif.write('CONTENT BEGIN\n')
 
-img = np.zeros((16, 16), np.ubyte)
 chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 k = 0
 for i in range(64):
+	img = np.zeros((16, 16), np.ubyte)
 	cv2.putText(img, chars[i], (2, 11), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
 	for line in img:
 		for p in line:
