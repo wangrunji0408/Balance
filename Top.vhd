@@ -50,7 +50,7 @@ architecture arch of Top is
 		port (
 			clk: in std_logic;		--游戏端时钟，60Hz，可能没用
 			
-			sx, sy: out natural range 0 to 15;
+			sx, sy: out MapXY;
 			pos_type: in TPos;
 			
 			unit_size: in natural; 	--每格的边长
@@ -76,9 +76,9 @@ architecture arch of Top is
 			clk60, clk100, rst, pause: in std_logic;	--游戏端时钟60Hz，复位（恢复初态），暂停（0为暂停，1为正常）
 			
 			-- Interfaces with SceneReader
-			query_sx, query_sy: out natural range 0 to 15;
+			query_sx, query_sy: out MapXY;
 			pos_type: in TPos;
-			start_x, start_y: in natural range 0 to 15;
+			start_x, start_y: in MapXY;
 			ready: in std_logic;
 			
 			unit_size: in natural; 	--每格的边长
@@ -106,16 +106,16 @@ architecture arch of Top is
 	component SceneReader is
 	port (
 		clk100, rst: in std_logic;
-		x1, y1, x2, y2: in natural range 0 to 15;	-- 坐标
+		x1, y1, x2, y2: MapXY;	-- 坐标
 		p1, p2: out TPos;  							-- 类型
-		start_x, start_y: out natural range 0 to 15;	-- 起始点
+		start_x, start_y: out MapXY;	-- 起始点
 		ready: out std_logic
 	);
 	end component;
 	
 	signal ax, ay, px, py, score: integer;
 	signal ax1, ay1, px1, py1, score1: integer;
-	signal start_x, start_y: natural;
+	signal start_x, start_y: MapXY;
 	signal w, a, s, d, w1, a1, s1, d1: std_logic;
 	signal vga_vs_temp: std_logic;
 	signal color: TColor;
@@ -129,9 +129,9 @@ architecture arch of Top is
 	signal phy_rst, phy_pause: std_logic;
 	signal ready: std_logic;
 	
-	signal physics_sx, physics_sy: natural range 0 to 15;
+	signal physics_sx, physics_sy: MapXY;
 	signal physics_pos_type: TPos;
-	signal renderer_sx, renderer_sy: natural range 0 to 15;
+	signal renderer_sx, renderer_sy: MapXY;
 	signal renderer_pos_type: TPos;
 	
 	-- for debug:
@@ -177,7 +177,6 @@ begin
 	
 	px_vec <= std_logic_vector( to_unsigned(px, 12) );
 	py_vec <= std_logic_vector( to_unsigned(py, 12) );
-	--debug_display(7) <= DisplayNumber( PosTypeToNum(nowt) );
 	debug_display(6) <= DisplayNumber(start_x);
 	debug_display(5) <= DisplayNumber(start_y);
 

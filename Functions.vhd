@@ -7,18 +7,26 @@ package Functions is
 	function DisplayNumber (number: unsigned(3 downto 0)) return std_logic_vector;
 	function DisplayNumber (number: integer) return std_logic_vector;
 	subtype DisplayCode is std_logic_vector(6 downto 0);
+	subtype MapXY is natural range 0 to 63;
 	type DisplayNums is array (7 downto 0) of DisplayCode;
-	type TPos is (None, Road, Terminal, Wall, Start);		--地图每格类型：空，正常道路
+	type TPos is (None, Ice, Pin, Land, GlassWall, WoodWall, IronWall, StartPoint, EndPoint, Hole,
+					SpringU, SpringD, SpringL, SpringR, AccU, AccD, AccL, AccR,
+					ToGlass, ToWood, ToIron, Gate1, Gate2);
 	type TResult is (Normal, Die, Win);					--回合结束状态：正常，死亡，赢
 	type TStatus is (Init, Run, Pause, Gameover);		--游戏状态：等待开始，进行中，暂停，结束
 	subtype TColor is std_logic_vector(8 downto 0); 	--颜色：[R2R1R0 G2G1G0 B2B1B0]
-	function ToPosType (x: std_logic_vector(3 downto 0)) return TPos;
-	function PosTypeToNum (t: TPos) return std_logic_vector;
+	function ToPosType (x: std_logic_vector(5 downto 0)) return TPos;
 	function ToColor (t: TPos) return TColor;
 	function ToCharId (c: character) return natural;
+	function isWall (t: TPos) return boolean;
 end package;
 
 package body Functions is
+
+	function isWall (t: TPos) return boolean is
+	begin
+		return t = GlassWall or t = WoodWall or t = IronWall;
+	end function;
 
 	function ToCharId (c: character) return natural is
 		constant ascii: natural := CHARACTER'POS(c);
@@ -34,42 +42,30 @@ package body Functions is
 		end if;
 	end function;
 
-	function ToPosType (x: std_logic_vector(3 downto 0))
+	function ToPosType (x: std_logic_vector(5 downto 0))
 		return TPos is
 	begin
-		case( x ) is
-			when "0000" => return None;
-			when "0001" => return Road;
-			when "0010" => return Terminal;
-			when "0011" => return Wall;
-			when "0100" => return Start;
-			when others => return None;
-		end case ;
-	end function;
-
-	function PosTypeToNum (t: TPos)
-		return std_logic_vector is
-	begin
-		case( t ) is
-			when None => return "0000";
-			when Road => return "0001";
-			when Terminal => return "0010";
-			when Wall => return "0011";
-			when Start => return "0100";
-			when others => return "1111";
-		end case ;
+		return TPos'val(to_integer(unsigned(x)));
+		-- case( x ) is
+		-- 	when 0 => return None;
+		-- 	when 1 => return Ice;
+		-- 	when 6 => return IronWall;
+		-- 	when 7 => return StartPoint;
+		-- 	when 8 => return EndPoint;
+		-- 	when others => return None;
+		-- end case ;
 	end function;
 	
 	function ToColor (t: TPos)
 		return TColor is
 	begin
 		case( t ) is
-			when None => return "000000000";
-			when Road => return "010010010";
-			when Terminal => return "111000000";
-			when Wall => return "000111000";
-			when Start => return "010010010";
-			when others => return "000000111";
+			when None => return o"000";
+			when Ice => return o"222";
+			when EndPoint => return o"700";
+			when IronWall => return o"070";
+			when StartPoint => return o"222";
+			when others => return o"007";
 		end case ;
 	end function;
 

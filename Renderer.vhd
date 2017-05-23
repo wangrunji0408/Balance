@@ -9,7 +9,7 @@ entity Renderer is
 	port (
 		clk: in std_logic;		--游戏端时钟，60Hz，可能没用
 		
-		sx, sy: out natural range 0 to 15;
+		sx, sy: out MapXY;
 		pos_type: in TPos;
 		
 		unit_size: in natural; 	--每格的边长
@@ -59,7 +59,7 @@ architecture game of Renderer is
 	component ImageReader is
 	port (
 		clk: in std_logic;
-		id: in natural range 0 to 15;	-- 图片编号
+		id: in natural range 0 to 63;	-- 图片编号
 		x, y: in natural range 0 to 15;	-- 坐标
 		color: out TColor				-- 颜色
 	);
@@ -129,7 +129,7 @@ architecture test_image_font of Renderer is
 	component ImageReader is
 	port (
 		clk: in std_logic;
-		id: in natural range 0 to 15;	-- 图片编号
+		id: in natural range 0 to 63;	-- 图片编号
 		x, y: in natural range 0 to 15;	-- 坐标
 		color: out TColor				-- 颜色
 	);

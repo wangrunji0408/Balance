@@ -45,19 +45,19 @@ ENTITY SceneROM IS
 		address_a		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
 		address_b		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
 		clock		: IN STD_LOGIC  := '1';
-		q_a		: OUT STD_LOGIC_VECTOR (3 DOWNTO 0);
-		q_b		: OUT STD_LOGIC_VECTOR (3 DOWNTO 0)
+		q_a		: OUT STD_LOGIC_VECTOR (5 DOWNTO 0);
+		q_b		: OUT STD_LOGIC_VECTOR (5 DOWNTO 0)
 	);
 END SceneROM;
 
 
 ARCHITECTURE SYN OF scenerom IS
 
-	SIGNAL sub_wire0	: STD_LOGIC_VECTOR (3 DOWNTO 0);
-	SIGNAL sub_wire1	: STD_LOGIC_VECTOR (3 DOWNTO 0);
+	SIGNAL sub_wire0	: STD_LOGIC_VECTOR (5 DOWNTO 0);
+	SIGNAL sub_wire1	: STD_LOGIC_VECTOR (5 DOWNTO 0);
 	SIGNAL sub_wire2	: STD_LOGIC ;
-	SIGNAL sub_wire3_bv	: BIT_VECTOR (3 DOWNTO 0);
-	SIGNAL sub_wire3	: STD_LOGIC_VECTOR (3 DOWNTO 0);
+	SIGNAL sub_wire3_bv	: BIT_VECTOR (5 DOWNTO 0);
+	SIGNAL sub_wire3	: STD_LOGIC_VECTOR (5 DOWNTO 0);
 
 
 
@@ -92,21 +92,21 @@ ARCHITECTURE SYN OF scenerom IS
 			clock0	: IN STD_LOGIC ;
 			wren_a	: IN STD_LOGIC ;
 			address_b	: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
-			data_b	: IN STD_LOGIC_VECTOR (3 DOWNTO 0);
-			q_a	: OUT STD_LOGIC_VECTOR (3 DOWNTO 0);
+			data_b	: IN STD_LOGIC_VECTOR (5 DOWNTO 0);
+			q_a	: OUT STD_LOGIC_VECTOR (5 DOWNTO 0);
 			wren_b	: IN STD_LOGIC ;
 			address_a	: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
-			data_a	: IN STD_LOGIC_VECTOR (3 DOWNTO 0);
-			q_b	: OUT STD_LOGIC_VECTOR (3 DOWNTO 0)
+			data_a	: IN STD_LOGIC_VECTOR (5 DOWNTO 0);
+			q_b	: OUT STD_LOGIC_VECTOR (5 DOWNTO 0)
 	);
 	END COMPONENT;
 
 BEGIN
 	sub_wire2    <= '0';
-	sub_wire3_bv(3 DOWNTO 0) <= "0000";
+	sub_wire3_bv(5 DOWNTO 0) <= "000000";
 	sub_wire3    <= To_stdlogicvector(sub_wire3_bv);
-	q_b    <= sub_wire0(3 DOWNTO 0);
-	q_a    <= sub_wire1(3 DOWNTO 0);
+	q_b    <= sub_wire0(5 DOWNTO 0);
+	q_a    <= sub_wire1(5 DOWNTO 0);
 
 	altsyncram_component : altsyncram
 	GENERIC MAP (
@@ -129,8 +129,8 @@ BEGIN
 		power_up_uninitialized => "FALSE",
 		widthad_a => 12,
 		widthad_b => 12,
-		width_a => 4,
-		width_b => 4,
+		width_a => 6,
+		width_b => 6,
 		width_byteena_a => 1,
 		width_byteena_b => 1,
 		wrcontrol_wraddress_reg_b => "CLOCK0"
@@ -184,7 +184,7 @@ END SYN;
 -- Retrieval info: PRIVATE: JTAG_ENABLED NUMERIC "0"
 -- Retrieval info: PRIVATE: JTAG_ID STRING "NONE"
 -- Retrieval info: PRIVATE: MAXIMUM_DEPTH NUMERIC "0"
--- Retrieval info: PRIVATE: MEMSIZE NUMERIC "16384"
+-- Retrieval info: PRIVATE: MEMSIZE NUMERIC "24576"
 -- Retrieval info: PRIVATE: MEM_IN_BITS NUMERIC "0"
 -- Retrieval info: PRIVATE: MIFfilename STRING "map.mif"
 -- Retrieval info: PRIVATE: OPERATION_MODE NUMERIC "3"
@@ -202,10 +202,10 @@ END SYN;
 -- Retrieval info: PRIVATE: USE_DIFF_CLKEN NUMERIC "0"
 -- Retrieval info: PRIVATE: UseDPRAM NUMERIC "1"
 -- Retrieval info: PRIVATE: VarWidth NUMERIC "0"
--- Retrieval info: PRIVATE: WIDTH_READ_A NUMERIC "4"
--- Retrieval info: PRIVATE: WIDTH_READ_B NUMERIC "4"
--- Retrieval info: PRIVATE: WIDTH_WRITE_A NUMERIC "4"
--- Retrieval info: PRIVATE: WIDTH_WRITE_B NUMERIC "4"
+-- Retrieval info: PRIVATE: WIDTH_READ_A NUMERIC "6"
+-- Retrieval info: PRIVATE: WIDTH_READ_B NUMERIC "6"
+-- Retrieval info: PRIVATE: WIDTH_WRITE_A NUMERIC "6"
+-- Retrieval info: PRIVATE: WIDTH_WRITE_B NUMERIC "6"
 -- Retrieval info: PRIVATE: WRADDR_ACLR_B NUMERIC "0"
 -- Retrieval info: PRIVATE: WRADDR_REG_B NUMERIC "1"
 -- Retrieval info: PRIVATE: WRCTRL_ACLR_B NUMERIC "0"
@@ -231,25 +231,25 @@ END SYN;
 -- Retrieval info: CONSTANT: POWER_UP_UNINITIALIZED STRING "FALSE"
 -- Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "12"
 -- Retrieval info: CONSTANT: WIDTHAD_B NUMERIC "12"
--- Retrieval info: CONSTANT: WIDTH_A NUMERIC "4"
--- Retrieval info: CONSTANT: WIDTH_B NUMERIC "4"
+-- Retrieval info: CONSTANT: WIDTH_A NUMERIC "6"
+-- Retrieval info: CONSTANT: WIDTH_B NUMERIC "6"
 -- Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "1"
 -- Retrieval info: CONSTANT: WIDTH_BYTEENA_B NUMERIC "1"
 -- Retrieval info: CONSTANT: WRCONTROL_WRADDRESS_REG_B STRING "CLOCK0"
 -- Retrieval info: USED_PORT: address_a 0 0 12 0 INPUT NODEFVAL "address_a[11..0]"
 -- Retrieval info: USED_PORT: address_b 0 0 12 0 INPUT NODEFVAL "address_b[11..0]"
 -- Retrieval info: USED_PORT: clock 0 0 0 0 INPUT VCC "clock"
--- Retrieval info: USED_PORT: q_a 0 0 4 0 OUTPUT NODEFVAL "q_a[3..0]"
--- Retrieval info: USED_PORT: q_b 0 0 4 0 OUTPUT NODEFVAL "q_b[3..0]"
+-- Retrieval info: USED_PORT: q_a 0 0 6 0 OUTPUT NODEFVAL "q_a[5..0]"
+-- Retrieval info: USED_PORT: q_b 0 0 6 0 OUTPUT NODEFVAL "q_b[5..0]"
 -- Retrieval info: CONNECT: @address_a 0 0 12 0 address_a 0 0 12 0
 -- Retrieval info: CONNECT: @address_b 0 0 12 0 address_b 0 0 12 0
 -- Retrieval info: CONNECT: @clock0 0 0 0 0 clock 0 0 0 0
--- Retrieval info: CONNECT: @data_a 0 0 4 0 GND 0 0 4 0
--- Retrieval info: CONNECT: @data_b 0 0 4 0 GND 0 0 4 0
+-- Retrieval info: CONNECT: @data_a 0 0 6 0 GND 0 0 6 0
+-- Retrieval info: CONNECT: @data_b 0 0 6 0 GND 0 0 6 0
 -- Retrieval info: CONNECT: @wren_a 0 0 0 0 GND 0 0 0 0
 -- Retrieval info: CONNECT: @wren_b 0 0 0 0 GND 0 0 0 0
--- Retrieval info: CONNECT: q_a 0 0 4 0 @q_a 0 0 4 0
--- Retrieval info: CONNECT: q_b 0 0 4 0 @q_b 0 0 4 0
+-- Retrieval info: CONNECT: q_a 0 0 6 0 @q_a 0 0 6 0
+-- Retrieval info: CONNECT: q_b 0 0 6 0 @q_b 0 0 6 0
 -- Retrieval info: GEN_FILE: TYPE_NORMAL SceneROM.vhd TRUE
 -- Retrieval info: GEN_FILE: TYPE_NORMAL SceneROM.inc FALSE
 -- Retrieval info: GEN_FILE: TYPE_NORMAL SceneROM.cmp TRUE

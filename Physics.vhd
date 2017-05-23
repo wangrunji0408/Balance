@@ -10,9 +10,9 @@ entity Physics is
 		clk60, clk100, rst, pause: in std_logic;	--游戏端时钟60Hz，复位（恢复初态），暂停（0为暂停，1为正常）
 		
 		-- Interfaces with SceneReader
-		query_sx, query_sy: out natural range 0 to 15;
+		query_sx, query_sy: out MapXY;
 		pos_type: in TPos;
-		start_x, start_y: in natural range 0 to 15;
+		start_x, start_y: in MapXY;
 		ready: in std_logic;
 		
 		unit_size: in natural; 	--每格的边长
@@ -33,8 +33,8 @@ architecture arch of Physics is
 	signal wallx, wally: boolean;
 	signal temp_type: TPos;
 begin
-	wallx <= temp_sceneX /= sx and temp_type = Wall;
-	wally <= temp_sceneY /= sy and temp_type = Wall;
+	wallx <= temp_sceneX /= sx and isWall(temp_type);
+	wally <= temp_sceneY /= sy and isWall(temp_type);
 	temp_px <= px + vx;
 	temp_py <= py + vy;
 	temp_vx <= -vx when wallx else vx + ax;
@@ -69,9 +69,9 @@ begin
 				vy <= temp_vy;
 				sx <= temp_sceneX;
 				sy <= temp_sceneY;
-				if temp_type = None then
+				if temp_type = Hole then
 					result <= Die;
-				elsif temp_type = terminal then
+				elsif temp_type = EndPoint then
 					result <= Win;
 					score <= score + 1;
 				else
