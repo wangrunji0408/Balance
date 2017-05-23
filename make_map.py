@@ -2,17 +2,36 @@ import cv2
 import numpy as np
 
 def colorToType (color):
-	color = tuple(color)
+	code = color[0] | (color[1] << 8) | (color[2] << 16)
 	ct = {
-		(128, 128, 128): 9,	# 黑：Hole 9
-		(255, 255, 255): 1,	# 白：Ice 1
-		(0, 0, 255): 8,		# 红：EndPoint 8
-		(0, 255, 0): 6,		# 绿：IronWall 6
-		(0, 255, 255): 7	# 黄：StartPoint 7
+		# rgb: id
+		0x000000: 0,
+		0xccffff: 1,
+		0xff9900: 2,
+		0x996600: 3,
+		0x66ffff: 4,
+		0xcc9900: 5,
+		0x333399: 6,
+		0xffff00: 7,
+		0xff0000: 8,
+		0x333333: 9,
+		0x33ff33: 10,
+		0x33ff66: 11,
+		0x33ff99: 12,
+		0x33ffcc: 13,
+		0xff0033: 14,
+		0xff0066: 15,
+		0xff0099: 16,
+		0xff00cc: 17,
+		0x66ccff: 18,
+		0xcccc00: 19,
+		0x336699: 20,
+		0x3300ff: 21,
+		0x3333ff: 22 
 	}
-	if ct.get(color, 0) == 0:
+	if code != 0 and ct.get(code, 0) == 0:
 		print('undefined color: ', color)
-	return ct.get(color, 0)
+	return ct.get(code, 0)
 
 width = 6
 image = cv2.imread('map.png')

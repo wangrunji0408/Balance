@@ -71,4 +71,6 @@
 !*.cmp
 !*.py
 
+!/images/
+
 # End of https://www.gitignore.io/api/alteraquartusii
