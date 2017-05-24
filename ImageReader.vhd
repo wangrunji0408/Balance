@@ -18,7 +18,7 @@ architecture arch of ImageReader is
 	component ImageROM IS
 	PORT
 	(
-		address		: IN STD_LOGIC_VECTOR (13 DOWNTO 0); -- [编号6][y4][x4]
+		address		: IN STD_LOGIC_VECTOR (13 DOWNTO 0); -- [编号6][x4][y4]
 		clock		: IN STD_LOGIC;
 		q		: OUT STD_LOGIC_VECTOR (8 DOWNTO 0)
 	);
@@ -27,6 +27,6 @@ architecture arch of ImageReader is
 begin
 	rom: ImageROM port map (address, clk, color);
 	address <= std_logic_vector(to_unsigned(id, 6)) & 
-					std_logic_vector(to_unsigned(y, 4)) & 
-					std_logic_vector(to_unsigned(x, 4));
+					std_logic_vector(to_unsigned(x, 4)) & 
+					std_logic_vector(to_unsigned(y, 4));
 end arch ; -- arch

@@ -61,6 +61,7 @@ architecture arch of Top is
 			px1, py1: in integer; 	--位置
 			score: in integer; 		--分数
 			status: in TStatus;		--游戏状态
+			result: in TResult;
 			
 			vga_clk: in std_logic;	--VGA端的时钟，25MHz
 			pixel_x, pixel_y: in natural;	--查询像素的坐标
@@ -122,9 +123,7 @@ architecture arch of Top is
 	signal clk25, clk60: std_logic;
 	signal vga_x, vga_y: std_logic_vector(9 downto 0);
 	signal result, result1: TResult;
-	constant unit_size: natural := 50;
-	constant ball_radius: natural := 20;
-	constant scale: natural := 5;
+	
 	signal status: TStatus := Init;
 	signal phy_rst, phy_pause: std_logic;
 	signal ready: std_logic;
@@ -133,6 +132,10 @@ architecture arch of Top is
 	signal physics_pos_type: TPos;
 	signal renderer_sx, renderer_sy: MapXY;
 	signal renderer_pos_type: TPos;
+	
+	constant unit_size: natural := 80;
+	constant ball_radius: natural := 30;
+	constant scale: natural := 5;
 	
 	-- for debug:
 	signal result_num: std_logic_vector(3 downto 0); 
@@ -163,7 +166,8 @@ begin
 		px => px, py => py,
 		px1 => px1, py1 => py1,
 		score => score,
-		status => Init,
+		status => status,
+		result => result,
 		vga_clk => clk25,
 		pixel_x => to_integer(unsigned(vga_x)),
 		pixel_y => to_integer(unsigned(vga_y)),

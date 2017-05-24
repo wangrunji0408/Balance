@@ -11,13 +11,14 @@ package Functions is
 	type DisplayNums is array (7 downto 0) of DisplayCode;
 	type TPos is (None, Ice, Pin, Land, GlassWall, WoodWall, IronWall, StartPoint, EndPoint, Hole,
 					SpringU, SpringD, SpringL, SpringR, AccU, AccD, AccL, AccR,
-					ToGlass, ToWood, ToIron, Gate1, Gate2);
+					ToGlass, ToWood, ToIron, Gate1, Gate2, GlassBall, WoodBall, IronBall);
+	subtype TBall is TPos range GlassBall to IronBall;
 	type TResult is (Normal, Die, Win);					--回合结束状态：正常，死亡，赢
 	type TStatus is (Init, Run, Pause, Gameover);		--游戏状态：等待开始，进行中，暂停，结束
 	subtype TColor is std_logic_vector(8 downto 0); 	--颜色：[R2R1R0 G2G1G0 B2B1B0]
 	function ToPosType (x: std_logic_vector(5 downto 0)) return TPos;
 	function ToColor (t: TPos) return TColor;
-	function ToCharId (c: character) return natural;
+	function ToBase64Id (c: character) return natural;
 	function isWall (t: TPos) return boolean;
 end package;
 
@@ -28,7 +29,7 @@ package body Functions is
 		return t = GlassWall or t = WoodWall or t = IronWall;
 	end function;
 
-	function ToCharId (c: character) return natural is
+	function ToBase64Id (c: character) return natural is
 		constant ascii: natural := CHARACTER'POS(c);
 	begin
 		if ascii >= CHARACTER'POS('A') and ascii <= CHARACTER'POS('Z') then 
