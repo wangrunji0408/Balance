@@ -8,7 +8,7 @@ entity Top is
 		-- 键盘输入
 		keyboard_data, keyboard_clk: in std_logic;
 		-- 陀螺仪输入
-		
+		i2c_data, i2c_clk: inout std_logic;
 		-- 总时钟
 		clk100: in std_logic;
 		-- 复位，暂停按钮
@@ -29,12 +29,22 @@ architecture arch of Top is
 			w, a, s, d, up, left, down, right: out std_logic
 		);
 	end component;
+
 	component WASDToAcc is
 		port (
 			w, a, s, d: in std_logic;
 			ax, ay: out integer
 		);
 	end component;
+
+	component Gyro is
+		port (
+			clk100, rst: in std_logic;
+			i2c_data, i2c_clk: inout std_logic;
+			ax_out, ay_out: out integer
+		);
+	end component;
+
 	component vga640480 is
 		port(
 			reset       :         in  STD_LOGIC;
@@ -46,6 +56,7 @@ architecture arch of Top is
 			r,g,b       :         out STD_LOGIC_vector(2 downto 0) --输出的颜色信号
 	  );
 	end component;
+	
 	component Renderer is
 		port (
 			clk: in std_logic;		--游戏端时钟，60Hz，可能没用
@@ -114,6 +125,7 @@ architecture arch of Top is
 	);
 	end component;
 	
+	signal gyro_ax, gyro_ay, kb_ax, kb_ay: integer;
 	signal ax, ay, px, py, score: integer;
 	signal ax1, ay1, px1, py1, score1: integer;
 	signal start_x, start_y: MapXY;
@@ -144,9 +156,13 @@ architecture arch of Top is
 begin
 	clk60 <= vga_vs_temp;
 	vga_vs <= vga_vs_temp;
+
+	ax <= kb_ax; ay <= kb_ay;
+	-- ax <= gyro_ax; ay <= gyro_ay;
 	
+	gyr: Gyro port map (clk100, rst, i2c_data, i2c_clk, gyro_ax, gyro_ay);
 	ktw: KeyboardToWASD port map (keyboard_data, keyboard_clk, clk100, not rst, w, a, s, d, w1, a1, s1, d1);
-	wta0: WASDToAcc port map (w, a, s, d, ax, ay);
+	wta0: WASDToAcc port map (w, a, s, d, kb_ax, kb_ay);
 	wta1: WASDToAcc port map (w1, a1, s1, d1, ax1, ay1);
 	reader: SceneReader port map (clk100, rst, physics_sx, physics_sy, renderer_sx, renderer_sy,
 					physics_pos_type, renderer_pos_type, start_x, start_y, ready);

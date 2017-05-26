@@ -131,6 +131,8 @@ set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name SLD_FILE "//Mac/Home/Documents/Codes/Tsinghua/Grade2-2/DigitalCircuits/Balance/src/stp1_auto_stripped.stp"
+set_global_assignment -name VHDL_FILE vga_controller.vhd
+set_global_assignment -name VHDL_FILE i2c_master.vhd
 set_global_assignment -name MIF_FILE image.mif
 set_global_assignment -name MIF_FILE font.mif
 set_global_assignment -name VHDL_FILE ImageReader.vhd
