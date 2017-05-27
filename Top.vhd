@@ -90,7 +90,8 @@ architecture arch of Top is
 			score: buffer integer; 	--分
 			result: buffer TResult;		--结果
 			
-			sx, sy: buffer natural
+			sx, sy: buffer natural;
+			show_radius: buffer natural
 		);
 	end component;
 	
@@ -133,14 +134,15 @@ architecture arch of Top is
 	signal renderer_sx, renderer_sy: MapXY;
 	signal renderer_pos_type: TPos;
 	
-	constant unit_size: natural := 80;
-	constant ball_radius: natural := 30;
-	constant scale: natural := 5;
+	constant unit_size: natural := 800;
+	constant ball_radius: natural := 300;
+	constant scale: natural := 100;
 	
 	-- for debug:
 	signal result_num: std_logic_vector(3 downto 0); 
 	signal px_vec, py_vec: std_logic_vector(11 downto 0);
 	signal sx, sy: natural;
+	signal show_radius: natural;
 begin
 	clk60 <= vga_vs_temp;
 	vga_vs <= vga_vs_temp;
@@ -152,7 +154,7 @@ begin
 					physics_pos_type, renderer_pos_type, start_x, start_y, ready);
 	phy: Physics port map (clk60, clk100, phy_rst, phy_pause, 
 									physics_sx, physics_sy, physics_pos_type, start_x, start_y, ready,
-									unit_size, ball_radius, ax, ay, px, py, score, result, sx, sy);
+									unit_size, ball_radius, ax, ay, px, py, score, result, sx, sy, show_radius);
 	ctrl: StatusController port map (clk60, rst, pause, result, status, phy_rst, phy_pause);
 	vga: vga640480 port map (rst, clk100, vga_x, vga_y, color, clk25, vga_hs, vga_vs_temp, vga_r, vga_g, vga_b);
 	ren: Renderer port map (
@@ -161,7 +163,7 @@ begin
 		sy => renderer_sy,
 		pos_type => renderer_pos_type,
 		unit_size => unit_size,
-		ball_radius => ball_radius,
+		ball_radius => show_radius,
 		scale => scale,
 		px => px, py => py,
 		px1 => px1, py1 => py1,
