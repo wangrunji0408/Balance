@@ -48,7 +48,9 @@ ENTITY i2c_master IS
     data_rd   : OUT    STD_LOGIC_VECTOR(7 DOWNTO 0); --data read from slave
     ack_error : BUFFER STD_LOGIC;                    --flag if improper acknowledge from slave
     sda       : INOUT  STD_LOGIC;                    --serial data output of i2c bus
-    scl       : INOUT  STD_LOGIC);                   --serial clock output of i2c bus
+    scl       : INOUT  STD_LOGIC;                   --serial clock output of i2c bus
+	 clk_quarter  : out std_LOGIC
+	 );
 END i2c_master;
 
 ARCHITECTURE logic OF i2c_master IS
@@ -68,10 +70,35 @@ ARCHITECTURE logic OF i2c_master IS
   SIGNAL stretch       : STD_LOGIC := '0';               --identifies if slave is stretching scl
 BEGIN
 
+	process (clk)
+		constant div16 : integer := (input_clk/bus_clk)/16;
+		CONSTANT div : INTEGER := (input_clk/bus_clk)/4*4;
+		variable i: integer range 0 to div16-1 := 0;
+		variable j: integer range 0 to div := 0;
+		variable c: std_logic := '0';
+	begin
+		if rising_edge(clk) then
+			if i = div16-1 or j = 0 then
+				i := 0;
+				c := not c;
+				clk_quarter <= c;
+			else
+				i := i + 1;
+			end if;
+			
+			if j = div-1 then
+				j := 0;
+			else
+				j := j + 1;
+			end if;
+		end if;
+	end process;
+
   --generate the timing for the bus clock (scl_clk) and the data clock (data_clk)
   PROCESS(clk, reset_n)
     VARIABLE count  :  INTEGER RANGE 0 TO divider*4;  --timing for clock generation
   BEGIN
+		
     IF(reset_n = '0') THEN                --reset asserted
       stretch <= '0';
       count := 0;

@@ -20,9 +20,29 @@ package Functions is
 	function ToColor (t: TPos) return TColor;
 	function ToBase64Id (c: character) return natural;
 	function isWall (t: TPos) return boolean;
+	function toString (x: integer) return string;
+	function toChar (x: integer range 0 to 9) return character;
 end package;
 
 package body Functions is
+
+	function toChar (x: integer range 0 to 9) return character is
+	begin
+		return character'val(character'pos('0') + x);
+	end function;
+
+	function toString (x: integer) return string is
+		variable s: string(1 to 6);
+		
+	begin
+		s(6) := toChar(x mod 10);
+		s(5) := toChar(x / 10 mod 10);
+		s(4) := toChar(x / 100 mod 10);
+		s(3) := toChar(x / 1000 mod 10);
+		s(2) := toChar(x / 10000 mod 10);
+		if x < 0 then s(1) := '-'; else s(1) := ' '; end if;
+		return s;
+	end function;
 
 	function isWall (t: TPos) return boolean is
 	begin

@@ -24,7 +24,10 @@ entity Renderer is
 		
 		vga_clk: in std_logic;	--VGA端的时钟，25MHz
 		pixel_x, pixel_y: in natural;	--查询像素的坐标
-		rgb: out TColor					--输出像素颜色
+		rgb: out TColor;					--输出像素颜色
+		
+		ax, ay, az: in std_logic_vector(15 downto 0);
+		gx, gy, gz: in std_logic_vector(15 downto 0)
 	);
 	
 	procedure RenderString (
@@ -48,7 +51,7 @@ entity Renderer is
 		constant dy: integer := pixel_y - y0;
 	begin
 		temp_id := dx / size;
-		if temp_id >= 0 and temp_id < str'high and dy >= 0 and dy < size then
+		if dx >= 0 and temp_id >= 0 and temp_id < str'high and dy >= 0 and dy < size then
 			id <= character'pos(str(temp_id+1));
 			x <= dy * 16 / size;
 			y <= dx * 16 / size - temp_id * 16;
@@ -100,6 +103,8 @@ begin
 	sy <= sceneY;
 	distance <= (temp_x - px) * (temp_x - px) + (temp_y - py) * (temp_y - py);
 	distance1 <= (temp_x - px1) * (temp_x - px1) + (temp_y - py1) * (temp_y - py1);
+	image_id <= TPos'pos(pos_type);
+	
 	process(vga_clk)
 		variable show: std_logic;
 		variable row, col: natural;
@@ -114,7 +119,6 @@ begin
 			--	rgb <= o"666";
 			else
 				-- Use texture
-				image_id <= TPos'pos(pos_type);
 				x <= (pixel_y * scale - sceneY * unit_size) * 16 / unit_size;
 				y <= (pixel_x * scale - sceneX * unit_size) * 16 / unit_size;
 				rgb <= image_color;
@@ -124,30 +128,30 @@ begin
 			end if;
 			
 			-- Debug: Show All Images and Fonts
-			row := pixel_y / 16;
-			col := pixel_x / 16;
-			if row = 20 and col < 32 then
-				image_id <= col;
-				rgb <= image_color;
-			elsif row = 21 and col < 32 then
-				image_id <= col + 32;
-				rgb <= image_color;
-			elsif row = 22 and col < 32 then
-				font_id <= col;
-				if font_bit = '1' then rgb <= o"777"; end if;
-			elsif row = 23 and col < 32 then
-				font_id <= col + 32;
-				if font_bit = '1' then rgb <= o"777"; end if;
-			elsif row = 24 and col < 32 then
-				font_id <= col + 64;
-				if font_bit = '1' then rgb <= o"777"; end if;
-			elsif row = 25 and col < 32 then
-				font_id <= col + 96;
-				if font_bit = '1' then rgb <= o"777"; end if;
-			end if;
+--			row := pixel_y / 16;
+--			col := pixel_x / 16;
+--			if row = 20 and col < 32 then
+--				image_id <= col;
+--				rgb <= image_color;
+--			elsif row = 21 and col < 32 then
+--				image_id <= col + 32;
+--				rgb <= image_color;
+--			elsif row = 22 and col < 32 then
+--				font_id <= col;
+--				if font_bit = '1' then rgb <= o"777"; end if;
+--			elsif row = 23 and col < 32 then
+--				font_id <= col + 32;
+--				if font_bit = '1' then rgb <= o"777"; end if;
+--			elsif row = 24 and col < 32 then
+--				font_id <= col + 64;
+--				if font_bit = '1' then rgb <= o"777"; end if;
+--			elsif row = 25 and col < 32 then
+--				font_id <= col + 96;
+--				if font_bit = '1' then rgb <= o"777"; end if;
+--			end if;
 			
 		
-			RenderString(font_id, x, y, font_bit, "test string azAZ", o"777", o"000", false, 32, 0, 270, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "test string azAZ", o"777", o"000", false, 32, 0, 270, pixel_x, pixel_y, rgb);
 			
 			case status is 
 				when Pause =>
@@ -161,7 +165,12 @@ begin
 				when others => null;
 			end case;
 			
-			RenderString(font_id, x, y, font_bit, "Score: " & integer'image(score), o"700", o"000", true, 16, 0, 480-16, pixel_x, pixel_y, rgb);
+			RenderString(font_id, x, y, font_bit, "ax: " & toString(conv_integer(ax)), o"777", o"000", true, 16, 0, 480-16*7, pixel_x, pixel_y, rgb);
+			RenderString(font_id, x, y, font_bit, "ay: " & toString(conv_integer(ay)), o"777", o"000", true, 16, 0, 480-16*6, pixel_x, pixel_y, rgb);
+			RenderString(font_id, x, y, font_bit, "az: " & toString(conv_integer(az)), o"777", o"000", true, 16, 0, 480-16*5, pixel_x, pixel_y, rgb);
+			RenderString(font_id, x, y, font_bit, "gx: " & toString(conv_integer(gx)), o"777", o"000", true, 16, 0, 480-16*4, pixel_x, pixel_y, rgb);
+			RenderString(font_id, x, y, font_bit, "gy: " & toString(conv_integer(gy)), o"777", o"000", true, 16, 0, 480-16*3, pixel_x, pixel_y, rgb);
+			RenderString(font_id, x, y, font_bit, "gz: " & toString(conv_integer(gz)), o"777", o"000", true, 16, 0, 480-16*2, pixel_x, pixel_y, rgb);
 			
 		end if;
 	end process;

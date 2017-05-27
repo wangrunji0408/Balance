@@ -41,7 +41,9 @@ architecture arch of Top is
 		port (
 			clk100, rst: in std_logic;
 			i2c_data, i2c_clk: inout std_logic;
-			ax_out, ay_out: out integer
+			ax_out, ay_out: out integer;
+			ax, ay, az: out std_logic_vector(15 downto 0);
+			gx, gy, gz: out std_logic_vector(15 downto 0)
 		);
 	end component;
 
@@ -77,6 +79,9 @@ architecture arch of Top is
 			vga_clk: in std_logic;	--VGA端的时钟，25MHz
 			pixel_x, pixel_y: in natural;	--查询像素的坐标
 			rgb: out TColor					--输出像素颜色
+			
+			ax, ay, az: in std_logic_vector(15 downto 0);
+			gx, gy, gz: in std_logic_vector(15 downto 0)
 		);
 	end component;
 
@@ -107,11 +112,11 @@ architecture arch of Top is
 	
 	component StatusController is
 	port (
-		clk: in std_logic;			--娓告垙绔椂閽燂紝60Hz
-		rst, pause_in: in std_logic;	--澶嶄綅锛屾殏鍋滄寜閽
-		result: in TResult;			--鍥炲悎缁撴潫鐘舵€
-		status: buffer TStatus;		--娓告垙鐘舵€	
-		phy_rst, phy_pause: out std_logic --鎺у埗鐗╃悊寮曟搸鐨勫浣嶃€佹殏鍋滐紙褰撳墠鏄洿鎺ヤ笌鎸夐挳鍏宠仈锛屾湭鏉ュ彲鑳芥湁鍙橈級
+		clk: in std_logic;			--游戏端时钟，60Hz
+		rst, pause_in: in std_logic;	--复位，暂停按钮
+		result: in TResult;			--回合结束状态
+		status: buffer TStatus;		--游戏状态
+		phy_rst, phy_pause: out std_logic --控制物理引擎的复位、暂停（当前是直接与按钮关联，未来可能有变）
 	);
 	end component;
 	
@@ -153,6 +158,7 @@ architecture arch of Top is
 	signal result_num: std_logic_vector(3 downto 0); 
 	signal px_vec, py_vec: std_logic_vector(11 downto 0);
 	signal sx, sy: natural;
+	signal ax0, ay0, az0, gx0, gy0, gz0: std_logic_vector(15 downto 0);
 begin
 	clk60 <= vga_vs_temp;
 	vga_vs <= vga_vs_temp;
@@ -160,7 +166,8 @@ begin
 	ax <= kb_ax; ay <= kb_ay;
 	-- ax <= gyro_ax; ay <= gyro_ay;
 	
-	gyr: Gyro port map (clk100, rst, i2c_data, i2c_clk, gyro_ax, gyro_ay);
+	gyr: Gyro port map (clk100, rst, i2c_data, i2c_clk, gyro_ax, gyro_ay,
+								ax0, ay0, az0, gx0, gy0, gz0);
 	ktw: KeyboardToWASD port map (keyboard_data, keyboard_clk, clk100, not rst, w, a, s, d, w1, a1, s1, d1);
 	wta0: WASDToAcc port map (w, a, s, d, kb_ax, kb_ay);
 	wta1: WASDToAcc port map (w1, a1, s1, d1, ax1, ay1);
@@ -187,7 +194,8 @@ begin
 		vga_clk => clk25,
 		pixel_x => to_integer(unsigned(vga_x)),
 		pixel_y => to_integer(unsigned(vga_y)),
-		rgb => color
+		rgb => color,
+		ax => ax0, ay => ay0, az => az0, gx => gx0, gy => gy0, gz => gz0
 	);
 	
 	result_num <= "0000" when result = Normal else
@@ -197,11 +205,11 @@ begin
 	
 	px_vec <= std_logic_vector( to_unsigned(px, 12) );
 	py_vec <= std_logic_vector( to_unsigned(py, 12) );
-	debug_display(6) <= DisplayNumber(start_x);
-	debug_display(5) <= DisplayNumber(start_y);
+	--debug_display(6) <= DisplayNumber(start_x);
+	--debug_display(5) <= DisplayNumber(start_y);
 
-	--debug_display(3) <= DisplayNumber( "000" & rst );
-	--debug_display(2) <= DisplayNumber( "000" & pause );
+	debug_display(3) <= DisplayNumber( unsigned(ax0(3 downto 0)) );
+	debug_display(2) <= DisplayNumber( unsigned(ay0(3 downto 0)) );
 	
 	debug_display(0) <= DisplayNumber(ay);
 	debug_display(1) <= DisplayNumber(ax);
