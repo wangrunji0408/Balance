@@ -90,6 +90,7 @@ architecture game of Renderer is
 	
 	signal temp_x, temp_y: integer;
 	signal sceneX, sceneY, distance, distance1, temp_scene: integer;
+	signal clk_num: integer := 0;
 
 begin
 	image: ImageReader port map (vga_clk, image_id, x, y, image_color);
@@ -103,8 +104,18 @@ begin
 	sy <= sceneY;
 	distance <= (temp_x - px) * (temp_x - px) + (temp_y - py) * (temp_y - py);
 	distance1 <= (temp_x - px1) * (temp_x - px1) + (temp_y - py1) * (temp_y - py1);
-	image_id <= TPos'pos(pos_type);
+	image_id <= TPos'pos(pos_type) + (clk_num / 30) * 32;
 	
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			clk_num <= clk_num + 1;
+			if clk_num = 60 then
+				clk_num <= 0;
+			end if;
+		end if;
+	end process;
+
 	process(vga_clk)
 		variable show: std_logic;
 		variable row, col: natural;
@@ -113,7 +124,7 @@ begin
 			y <= pixel_x; x <= pixel_y;
 			
 			-- Render Scene
-			if ball_radius * ball_radius >= distance then
+			if ball_radius * ball_radius >= distance and ABS(temp_x - px) <= distance and ABS(temp_y - py) <= distance then
 				rgb <= o"777";
 			--elsif ball_radius * ball_radius >= distance1 then
 			--	rgb <= o"666";
@@ -150,8 +161,7 @@ begin
 --				if font_bit = '1' then rgb <= o"777"; end if;
 --			end if;
 			
-		
-			--RenderString(font_id, x, y, font_bit, "test string azAZ", o"777", o"000", false, 32, 0, 270, pixel_x, pixel_y, rgb);
+--			RenderString(font_id, x, y, font_bit, "abc bdf", o"777", o"000", false, 50, 0, 270, pixel_x, pixel_y, rgb);
 			
 			case status is 
 				when Pause =>
@@ -171,6 +181,9 @@ begin
 			RenderString(font_id, x, y, font_bit, "gx: " & toString(conv_integer(gx)), o"777", o"000", true, 16, 0, 480-16*4, pixel_x, pixel_y, rgb);
 			RenderString(font_id, x, y, font_bit, "gy: " & toString(conv_integer(gy)), o"777", o"000", true, 16, 0, 480-16*3, pixel_x, pixel_y, rgb);
 			RenderString(font_id, x, y, font_bit, "gz: " & toString(conv_integer(gz)), o"777", o"000", true, 16, 0, 480-16*2, pixel_x, pixel_y, rgb);
+
+			RenderString(font_id, x, y, font_bit, "Score: " & toString(conv_integer(score)), o"700", o"000", true, 16, 0, 480-16, pixel_x, pixel_y, rgb);
+
 			
 		end if;
 	end process;
