@@ -33,14 +33,16 @@ package body Functions is
 
 	function toString (x: integer) return string is
 		variable s: string(1 to 6);
-		
+		constant minus: boolean := x < 0;
+		variable absx: natural;
 	begin
-		s(6) := toChar(x mod 10);
-		s(5) := toChar(x / 10 mod 10);
-		s(4) := toChar(x / 100 mod 10);
-		s(3) := toChar(x / 1000 mod 10);
-		s(2) := toChar(x / 10000 mod 10);
-		if x < 0 then s(1) := '-'; else s(1) := ' '; end if;
+		if minus then absx := -x; else absx := x; end if;
+		s(6) := toChar(absx mod 10);
+		s(5) := toChar(absx / 10 mod 10);
+		s(4) := toChar(absx / 100 mod 10);
+		s(3) := toChar(absx / 1000 mod 10);
+		s(2) := toChar(absx / 10000 mod 10);
+		if minus then s(1) := '-'; else s(1) := ' '; end if;
 		return s;
 	end function;
 

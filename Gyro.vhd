@@ -8,8 +8,8 @@ entity Gyro is
 		clk100, rst: in std_logic;
 		i2c_data, i2c_clk: inout std_logic;
 		ax_out, ay_out: out integer;
-		ax, ay, az: out std_logic_vector(15 downto 0);
-		gx, gy, gz: out std_logic_vector(15 downto 0)
+		ax1, ay1, az1: out integer;
+		gx1, gy1, gz1: out integer
 	);
 end entity;
 
@@ -37,8 +37,8 @@ architecture arch of Gyro is
 	signal enable, rw, ack_error, busy: std_logic;
 	signal last_busy: std_logic;
 
-	--signal ax, ay, az: std_logic_vector(15 downto 0);
-	--signal gx, gy, gz: std_logic_vector(15 downto 0);
+	signal ax, ay, az: std_logic_vector(15 downto 0);
+	signal gx, gy, gz: std_logic_vector(15 downto 0);
 	
 	constant SMPLRT_DIV		: TData := x"19";	-- 陀螺仪采样率，典型值：0x07(125Hz)
 	constant CONFIG			: TData := x"1A";	-- 低通滤波频率，典型值：0x06(5Hz)
@@ -67,18 +67,32 @@ begin
 		generic map (100_000_000, 400_000)
 		port map (clk100, rst, enable, SlaveAddress(7 downto 1), rw, data_write, busy, data_read, ack_error, i2c_data, i2c_clk);
 	
+	ax1 <= to_integer(signed(ax));
+	ay1 <= to_integer(signed(ay));
+	az1 <= to_integer(signed(az));
+	gx1 <= to_integer(signed(gz));
+	gy1 <= to_integer(signed(gy));
+	gz1 <= to_integer(signed(gz));
+	ax_out <= to_integer(SHIFT_RIGHT(signed(ay),10));
+	ay_out <= to_integer(SHIFT_RIGHT(signed(ax),10));
+	
 	process (clk100)
 		variable busy_event_cnt : natural := 0;
+		variable silent_cnt: natural range 0 to 100_000 := 0;
 	begin
-		if rst = '0' then
+		if rst = '0' or silent_cnt = 100_000 then
 			busy_event_cnt := 0;
 			enable <= '0';
 			rw <= '0';
 			data_write <= x"00";
+			silent_cnt := 0;
 		elsif rising_edge(clk100) then
 			last_busy <= busy;
-			if (last_busy xor busy) = '1' and ack_error = '0' then
+			if (last_busy xor busy) = '1' then
 				busy_event_cnt := busy_event_cnt + 1;
+				silent_cnt := 0;
+			else
+				silent_cnt := silent_cnt + 1;
 			end if;
 			
 			case busy_event_cnt is
@@ -176,9 +190,63 @@ begin
 					enable <= '0';
 				when 45 =>
 					az(7 downto 0) <= data_read;
+					enable <= '1';
+					rw <= '0';
+					data_write <= GYRO_XOUT_H;
+				when 46 to 47 =>
+					rw <= '1';
+				when 48 =>
+					enable <= '0';
+				when 49 =>
+					gx(15 downto 8) <= data_read;
+					enable <= '1';
+					rw <= '0';
+					data_write <= GYRO_XOUT_L;
+				when 50 to 51 =>
+					rw <= '1';
+				when 52 =>
+					enable <= '0';
+				when 53 =>
+					gx(7 downto 0) <= data_read;
+					enable <= '1';
+					rw <= '0';
+					data_write <= GYRO_YOUT_H;
+				when 54 to 55 =>
+					rw <= '1';
+				when 56 =>
+					enable <= '0';
+				when 57 =>
+					gy(15 downto 8) <= data_read;
+					enable <= '1';
+					rw <= '0';
+					data_write <= GYRO_YOUT_L;
+				when 58 to 59 =>
+					rw <= '1';
+				when 60 =>
+					enable <= '0';
+				when 61 =>
+					gy(7 downto 0) <= data_read;
+					enable <= '1';
+					rw <= '0';
+					data_write <= GYRO_ZOUT_H;
+				when 62 to 63 =>
+					rw <= '1';
+				when 64 =>
+					enable <= '0';
+				when 65 =>
+					gz(15 downto 8) <= data_read;
+					enable <= '1';
+					rw <= '0';
+					data_write <= GYRO_ZOUT_L;
+				when 66 to 67 =>
+					rw <= '1';
+				when 68 =>
+					enable <= '0';
+				when 69 =>
+					gz(7 downto 0) <= data_read;
 					busy_event_cnt := 21;
-
-				when others => null;
+				when others =>
+					busy_event_cnt := 0;
 			end case;
 			
 		end if;

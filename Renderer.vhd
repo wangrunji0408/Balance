@@ -26,8 +26,9 @@ entity Renderer is
 		pixel_x, pixel_y: in natural;	--查询像素的坐标
 		rgb: out TColor;					--输出像素颜色
 		
-		ax, ay, az: in std_logic_vector(15 downto 0);
-		gx, gy, gz: in std_logic_vector(15 downto 0)
+		ax, ay: in integer;
+		ax1, ay1, az1: in integer;
+		gx1, gy1, gz1: in integer
 	);
 	
 	procedure RenderString (
@@ -91,6 +92,11 @@ architecture game of Renderer is
 	signal temp_x, temp_y: integer;
 	signal sceneX, sceneY, distance, distance1, temp_scene: integer;
 	signal clk_num: integer := 0;
+	
+	function in_circle (dx, dy: integer; r: natural) return boolean is
+	begin
+		return abs(dx) <= r and abs(dy) <= r and dx * dx + dy * dy <= r * r;
+	end function;
 
 begin
 	image: ImageReader port map (vga_clk, image_id, x, y, image_color);
@@ -102,8 +108,6 @@ begin
 	sceneY <= temp_y / unit_size;
 	sx <= sceneX;
 	sy <= sceneY;
-	distance <= (temp_x - px) * (temp_x - px) + (temp_y - py) * (temp_y - py);
-	distance1 <= (temp_x - px1) * (temp_x - px1) + (temp_y - py1) * (temp_y - py1);
 	image_id <= TPos'pos(pos_type) + (clk_num / 30) * 32;
 	
 	process(clk)
@@ -124,10 +128,10 @@ begin
 			y <= pixel_x; x <= pixel_y;
 			
 			-- Render Scene
-			if ball_radius * ball_radius >= distance and ABS(temp_x - px) <= distance and ABS(temp_y - py) <= distance then
+			if in_circle(temp_x - px, temp_y - py, ball_radius) then
 				rgb <= o"777";
-			--elsif ball_radius * ball_radius >= distance1 then
-			--	rgb <= o"666";
+			elsif in_circle(temp_x - px1, temp_y - py1, ball_radius) then
+				rgb <= o"666";
 			else
 				-- Use texture
 				x <= (pixel_y * scale - sceneY * unit_size) * 16 / unit_size;
@@ -175,12 +179,14 @@ begin
 				when others => null;
 			end case;
 			
-			RenderString(font_id, x, y, font_bit, "ax: " & toString(conv_integer(ax)), o"777", o"000", true, 16, 0, 480-16*7, pixel_x, pixel_y, rgb);
-			RenderString(font_id, x, y, font_bit, "ay: " & toString(conv_integer(ay)), o"777", o"000", true, 16, 0, 480-16*6, pixel_x, pixel_y, rgb);
-			RenderString(font_id, x, y, font_bit, "az: " & toString(conv_integer(az)), o"777", o"000", true, 16, 0, 480-16*5, pixel_x, pixel_y, rgb);
-			RenderString(font_id, x, y, font_bit, "gx: " & toString(conv_integer(gx)), o"777", o"000", true, 16, 0, 480-16*4, pixel_x, pixel_y, rgb);
-			RenderString(font_id, x, y, font_bit, "gy: " & toString(conv_integer(gy)), o"777", o"000", true, 16, 0, 480-16*3, pixel_x, pixel_y, rgb);
-			RenderString(font_id, x, y, font_bit, "gz: " & toString(conv_integer(gz)), o"777", o"000", true, 16, 0, 480-16*2, pixel_x, pixel_y, rgb);
+			RenderString(font_id, x, y, font_bit, "ax: " & toString(ax), o"777", o"000", true, 16, 0, 480-16*9, pixel_x, pixel_y, rgb);
+			RenderString(font_id, x, y, font_bit, "ay: " & toString(ay), o"777", o"000", true, 16, 0, 480-16*8, pixel_x, pixel_y, rgb);
+			RenderString(font_id, x, y, font_bit, "ax: " & toString(ax1), o"777", o"000", true, 16, 0, 480-16*7, pixel_x, pixel_y, rgb);
+			RenderString(font_id, x, y, font_bit, "ay: " & toString(ay1), o"777", o"000", true, 16, 0, 480-16*6, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "az: " & toString(az1), o"777", o"000", true, 16, 0, 480-16*5, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "gx: " & toString(gx1), o"777", o"000", true, 16, 0, 480-16*4, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "gy: " & toString(gy1), o"777", o"000", true, 16, 0, 480-16*3, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "gz: " & toString(gz1), o"777", o"000", true, 16, 0, 480-16*2, pixel_x, pixel_y, rgb);
 
 			RenderString(font_id, x, y, font_bit, "Score: " & toString(conv_integer(score)), o"700", o"000", true, 16, 0, 480-16, pixel_x, pixel_y, rgb);
 

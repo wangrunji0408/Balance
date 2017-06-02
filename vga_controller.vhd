@@ -26,15 +26,15 @@ use work.Functions.all;
 
 ENTITY vga_controller IS
   GENERIC(
+	 h_pixels :  INTEGER   := 1920;  --horiztonal display width in pixels
+	 h_fp     :  INTEGER   := 128;   --horiztonal front porch width in pixels
     h_pulse  :  INTEGER   := 208;   --horiztonal sync pulse width in pixels
     h_bp     :  INTEGER   := 336;   --horiztonal back porch width in pixels
-    h_pixels :  INTEGER   := 1920;  --horiztonal display width in pixels
-    h_fp     :  INTEGER   := 128;   --horiztonal front porch width in pixels
     h_pol    :  STD_LOGIC := '0';   --horizontal sync pulse polarity (1 = positive, 0 = negative)
+	 v_pixels :  INTEGER   := 1200;  --vertical display width in rows
+	 v_fp     :  INTEGER   := 1;     --vertical front porch width in rows
     v_pulse  :  INTEGER   := 3;     --vertical sync pulse width in rows
     v_bp     :  INTEGER   := 38;    --vertical back porch width in rows
-    v_pixels :  INTEGER   := 1200;  --vertical display width in rows
-    v_fp     :  INTEGER   := 1;     --vertical front porch width in rows
     v_pol    :  STD_LOGIC := '1');  --vertical sync pulse polarity (1 = positive, 0 = negative)
   PORT(
     pixel_clk :  IN   STD_LOGIC;  --pixel clock at frequency of VGA mode being used

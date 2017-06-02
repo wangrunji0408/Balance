@@ -8,7 +8,7 @@ entity vga640480 is
 	 port(
 			reset       :         in  STD_LOGIC;
 			clk100      :         in  STD_LOGIC; --100M时钟输入
-			x, y		:		  out std_logic_vector(9 downto 0); --输出当前要绘制的像素位置
+			x, y		:		  out natural; --输出当前要绘制的像素位置
 			color_in :    		in TColor; --输入给定像素位置的颜色
 			clk25       :		  out std_logic; --输出25MHz工作时钟
 			hs,vs       :         out STD_LOGIC; --行同步、场同步信号
@@ -25,8 +25,8 @@ architecture behavior of vga640480 is
 	signal clk, clk50	:	 std_logic;
 begin
  -----------------------------------------------------------------------
- 	x <= vector_x when vector_x >= 0 and vector_x < 640 else (others => '0');
-	y <= "0" & vector_y when vector_y >= 0 and vector_y < 480 else (others => '0');
+ 	x <= conv_integer(vector_x) when vector_x >= 0 and vector_x < 640 else 0;
+	y <= conv_integer(vector_y) when vector_y >= 0 and vector_y < 480 else 0;
  -----------------------------------------------------------------------
 	process(clk100)	--对100M输入信号二分频
 	begin
