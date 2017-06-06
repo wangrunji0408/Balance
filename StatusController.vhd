@@ -17,13 +17,19 @@ end entity;
 architecture arch of StatusController is
 begin
 	phy_rst <= rst;
-	phy_pause <= pause_in;
+	phy_pause <= '0' when pause_in = '0' or status = Init else '1';
 	process( clk, rst )
 	begin
 		if rst = '0' then
 			status <= Init;
 		elsif rising_edge(clk) then
-			if pause_in = '0' then
+			if status = Init then
+				if pause_in = '0' then
+					status <= Run;
+				else
+					status <= Init;
+				end if;
+			elsif pause_in = '0' then
 				status <= Pause;
 			elsif result = Die or result = Win then
 				status <= Gameover;

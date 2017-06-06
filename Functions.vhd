@@ -20,7 +20,7 @@ package Functions is
 	function ToColor (t: TPos) return TColor;
 	function ToBase64Id (c: character) return natural;
 	function isWall (t: TPos) return boolean;
-	function toString (x: integer) return string;
+	function toString (x: integer range -100000 to 100000) return string;
 	function toChar (x: integer range 0 to 9) return character;
 end package;
 
@@ -31,7 +31,7 @@ package body Functions is
 		return character'val(character'pos('0') + x);
 	end function;
 
-	function toString (x: integer) return string is
+	function toString (x: integer range -100000 to 100000) return string is
 		variable s: string(1 to 6);
 		constant minus: boolean := x < 0;
 		variable absx: natural;

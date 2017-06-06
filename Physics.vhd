@@ -13,6 +13,7 @@ entity Physics is
 		query_sx, query_sy: out MapXY;
 		pos_type: in TPos;
 		start_x, start_y: in MapXY;
+		gate2_x, gate2_y: in MapXY;
 		ready: in std_logic;
 		
 		unit_size: in natural; 	--每格的边长
@@ -23,7 +24,6 @@ entity Physics is
 		score: buffer integer; 			--分
 		result: buffer TResult;		--结果
 		
-		sx, sy: buffer natural;
 		show_radius: buffer natural
 	);
 end entity;
@@ -31,15 +31,17 @@ architecture arch of Physics is
 	signal temp_px, temp_py, temp_vx, temp_vy, temp_sceneX, temp_sceneY, temp_remX, temp_remY, temp_swapX, temp_swapY, temp_temp_vx, temp_temp_vy: integer;
 	signal temp_scene: integer;
 	signal vx, vy: integer := 0;
+	signal sx, sy: natural;
 	signal wallx, wally: boolean;
 	signal temp_type: TPos;
 	signal clk_num: integer := 0;
 	signal clk1000: std_logic;
+	constant vmax: natural := 4096;
 begin
 	wallx <= temp_sceneX /= sx and isWall(temp_type);
 	wally <= temp_sceneY /= sy and isWall(temp_type);
-	temp_px <= px + vx;
-	temp_py <= py + vy;
+	temp_px <= gate2_x when temp_type = Gate1 else px + vx;
+	temp_py <= gate2_y when temp_type = Gate1 else py + vy;
 	temp_temp_vx <= -vx when wallx and temp_type = IronWall else
 					-(vx / 2 + temp_remX) when wallx and temp_type = GlassWall else
 					-(vx / 10 + 2 * temp_remX) when wallx and temp_type = WoodWall else
@@ -64,8 +66,23 @@ begin
 					 -1 when temp_type = AccL else 0;
 	temp_swapY <= 1 when temp_type = AccD else
 					 -1 when temp_type = AccU else 0;
-	temp_vx <= temp_temp_vx + temp_swapX * 5;
-	temp_vy <= temp_temp_vy + temp_swapY * 5;
+					 
+	process (temp_temp_vx, temp_temp_vy)
+		variable vx, vy: integer;
+	begin
+		vx := temp_temp_vx + temp_swapX * 5;
+		if vx > vmax then vx := vmax;
+		elsif vx < -vmax then vx := -vmax;
+		end if;
+		temp_vx <= vx;
+		
+		vy := temp_temp_vy + temp_swapY * 5;
+		if vy > vmax then vy := vmax;
+		elsif vy < -vmax then vy := -vmax;
+		end if;
+		temp_vy <= vy;
+	end process;
+
 	-- query pos type
 	query_sx <= temp_sceneX;
 	query_sy <= temp_sceneY;
@@ -91,7 +108,8 @@ begin
 			score <= 0;
 			result <= Normal;
 			show_radius <= ball_radius;
-		elsif rising_edge(clk60) then
+			last_ready := '0';
+		elsif falling_edge(clk60) then
 			if last_ready = '0' and ready = '1' then
 				px <= start_x * unit_size;
 				py <= start_y * unit_size;
@@ -106,7 +124,7 @@ begin
 				sx <= temp_sceneX;
 				sy <= temp_sceneY;
 				if temp_type = Hole then
-					show_radius <= show_radius - 1;
+					show_radius <= show_radius - 4;
 					if show_radius < ball_radius / 2 then 
 						result <= Die;
 					end if;

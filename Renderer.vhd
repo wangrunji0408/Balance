@@ -18,17 +18,16 @@ entity Renderer is
 		
 		px, py: in integer; 		--位置
 		px1, py1: in integer; 	--位置
-		score: in integer; 		--分数
+		score, score1: in integer; 		--分数
 		status: in TStatus;		--游戏状态
 		result: in TResult;
 		
 		vga_clk: in std_logic;	--VGA端的时钟，25MHz
 		pixel_x, pixel_y: in natural;	--查询像素的坐标
-		rgb: out TColor;					--输出像素颜色
+		color: out TColor;					--输出像素颜色
 		
-		ax, ay: in integer;
-		ax1, ay1, az1: in integer;
-		gx1, gy1, gz1: in integer
+		ax, ay, ax1, ay1: in integer;
+		use_keyboard: in boolean
 	);
 	
 	procedure RenderString (
@@ -88,6 +87,8 @@ architecture game of Renderer is
 	signal x, y: natural range 0 to 15;
 	signal image_color: TColor;
 	signal font_bit: std_logic;
+	signal rgb: TColor;
+	signal show_area: boolean;
 	
 	signal temp_x, temp_y: integer;
 	signal sceneX, sceneY, distance, distance1, temp_scene: integer;
@@ -102,13 +103,14 @@ begin
 	image: ImageReader port map (vga_clk, image_id, x, y, image_color);
 	font: FontReader port map (vga_clk, font_id, x, y, font_bit);
 	
-	temp_x <= conv_integer(pixel_x) * scale;
-	temp_y <= conv_integer(pixel_y) * scale;
+	temp_x <= pixel_x * scale;
+	temp_y <= pixel_y * scale;
 	sceneX <= temp_x / unit_size;
 	sceneY <= temp_y / unit_size;
 	sx <= sceneX;
 	sy <= sceneY;
-	image_id <= TPos'pos(pos_type) + (clk_num / 30) * 32;
+	show_area <= pixel_x < 768;
+	color <= rgb;
 	
 	process(clk)
 	begin
@@ -128,18 +130,33 @@ begin
 			y <= pixel_x; x <= pixel_y;
 			
 			-- Render Scene
-			if in_circle(temp_x - px, temp_y - py, ball_radius) then
-				rgb <= o"777";
-			elsif in_circle(temp_x - px1, temp_y - py1, ball_radius) then
-				rgb <= o"666";
+			if show_area then
+				if in_circle(temp_x - px, temp_y - py, ball_radius) then
+					y <= (temp_x - px) * 8 / ball_radius + 8;
+					x <= (temp_y - py) * 8 / ball_radius + 8;
+					image_id <= 25;
+					rgb <= image_color;
+				elsif in_circle(temp_x - px1, temp_y - py1, ball_radius) then
+					y <= (temp_x - px1) * 8 / ball_radius + 8;
+					x <= (temp_y - py1) * 8 / ball_radius + 8;
+					image_id <= 24;
+					rgb <= image_color;
+				else
+					-- Use texture
+					x <= (pixel_y * scale - sceneY * unit_size) * 16 / unit_size;
+					y <= (pixel_x * scale - sceneX * unit_size) * 16 / unit_size;
+					if clk_num < 30 then 
+						image_id <= TPos'pos(pos_type);
+					else
+						image_id <= TPos'pos(pos_type) + 32;
+					end if;
+					rgb <= image_color;
+					
+					-- Use color
+					--rgb <= ToColor( pos_type );
+				end if;
 			else
-				-- Use texture
-				x <= (pixel_y * scale - sceneY * unit_size) * 16 / unit_size;
-				y <= (pixel_x * scale - sceneX * unit_size) * 16 / unit_size;
-				rgb <= image_color;
-				
-				-- Use color
-				--rgb <= ToColor( pos_type );
+				rgb <= o"000";
 			end if;
 			
 			-- Debug: Show All Images and Fonts
@@ -168,6 +185,8 @@ begin
 --			RenderString(font_id, x, y, font_bit, "abc bdf", o"777", o"000", false, 50, 0, 270, pixel_x, pixel_y, rgb);
 			
 			case status is 
+				when Init =>
+					RenderString(font_id, x, y, font_bit, "Ready", o"777", o"000", true, 32, 200,200, pixel_x, pixel_y, rgb);
 				when Pause =>
 					RenderString(font_id, x, y, font_bit, "Pause", o"777", o"000", true, 32, 200,200, pixel_x, pixel_y, rgb);
 				when Gameover => 
@@ -179,16 +198,23 @@ begin
 				when others => null;
 			end case;
 			
-			RenderString(font_id, x, y, font_bit, "ax: " & toString(ax), o"777", o"000", true, 16, 0, 480-16*9, pixel_x, pixel_y, rgb);
-			RenderString(font_id, x, y, font_bit, "ay: " & toString(ay), o"777", o"000", true, 16, 0, 480-16*8, pixel_x, pixel_y, rgb);
-			RenderString(font_id, x, y, font_bit, "ax: " & toString(ax1), o"777", o"000", true, 16, 0, 480-16*7, pixel_x, pixel_y, rgb);
-			RenderString(font_id, x, y, font_bit, "ay: " & toString(ay1), o"777", o"000", true, 16, 0, 480-16*6, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "ax0: " & toString(ax), o"777", o"000", true, 16, 0, 480-16*9, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "ay0: " & toString(ay), o"777", o"000", true, 16, 0, 480-16*8, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "ax1: " & toString(ax1), o"777", o"000", true, 16, 0, 480-16*7, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "ay1: " & toString(ay1), o"777", o"000", true, 16, 0, 480-16*6, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "ax: " & toString(ax1), o"777", o"000", true, 16, 0, 480-16*7, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "ay: " & toString(ay1), o"777", o"000", true, 16, 0, 480-16*6, pixel_x, pixel_y, rgb);
 			--RenderString(font_id, x, y, font_bit, "az: " & toString(az1), o"777", o"000", true, 16, 0, 480-16*5, pixel_x, pixel_y, rgb);
 			--RenderString(font_id, x, y, font_bit, "gx: " & toString(gx1), o"777", o"000", true, 16, 0, 480-16*4, pixel_x, pixel_y, rgb);
 			--RenderString(font_id, x, y, font_bit, "gy: " & toString(gy1), o"777", o"000", true, 16, 0, 480-16*3, pixel_x, pixel_y, rgb);
 			--RenderString(font_id, x, y, font_bit, "gz: " & toString(gz1), o"777", o"000", true, 16, 0, 480-16*2, pixel_x, pixel_y, rgb);
-
-			RenderString(font_id, x, y, font_bit, "Score: " & toString(conv_integer(score)), o"700", o"000", true, 16, 0, 480-16, pixel_x, pixel_y, rgb);
+			if use_keyboard then
+				RenderString(font_id, x, y, font_bit, "Input: Keyboard", o"777", o"000", true, 16, 768, 768-16*3, pixel_x, pixel_y, rgb);
+			else
+				RenderString(font_id, x, y, font_bit, "Input: Gyro", o"777", o"000", true, 16, 768, 768-16*3, pixel_x, pixel_y, rgb);
+			end if;
+			RenderString(font_id, x, y, font_bit, "Player0: " & toString(conv_integer(score)), o"700", o"000", true, 16, 768, 768-16*2, pixel_x, pixel_y, rgb);
+			RenderString(font_id, x, y, font_bit, "Player1: " & toString(conv_integer(score1)), o"700", o"000", true, 16, 768, 768-16, pixel_x, pixel_y, rgb);
 
 			
 		end if;
