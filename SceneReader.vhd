@@ -5,7 +5,7 @@ use work.Functions.all;
 
 entity SceneReader is
 	port (
-		clk100, rst: in std_logic;
+		clk1, clk2, rst: in std_logic;
 		x1, y1, x2, y2: in MapXY;		-- 坐标
 		p1, p2: out TPos;  				-- 类型
 		start_x, start_y: out MapXY;	-- 起始点
@@ -20,7 +20,8 @@ architecture arch of SceneReader is
 		(
 			address_a		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
 			address_b		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
-			clock		: IN STD_LOGIC;
+			clock_a		: IN STD_LOGIC  := '1';
+			clock_b		: IN STD_LOGIC ;
 			q_a		: OUT STD_LOGIC_VECTOR (5 DOWNTO 0);
 			q_b		: OUT STD_LOGIC_VECTOR (5 DOWNTO 0)
 		);
@@ -32,18 +33,18 @@ architecture arch of SceneReader is
 	signal temp_ready: std_logic := '0';
 	signal clk10: std_logic := '0';
 begin
-	rom: SceneROM port map (address1, address2, clk100, q1, q2);
-	address1 <= std_logic_vector(to_unsigned(y1, 6) & to_unsigned(x1, 6));
-	address2 <= std_logic_vector(to_unsigned(y2, 6) & to_unsigned(x2, 6)) when temp_ready = '1' else address0;
-	p1 <= ToPosType(q1);
-	p0 <= ToPosType(q2);
-	p2 <= p0;
+	rom: SceneROM port map (address1, address2, clk1, clk2, q1, q2);
+	address1 <= std_logic_vector(to_unsigned(y1, 6) & to_unsigned(x1, 6)) when temp_ready = '1' else address0;
+	address2 <= std_logic_vector(to_unsigned(y2, 6) & to_unsigned(x2, 6));
+	p0 <= ToPosType(q1);
+	p2 <= ToPosType(q2);
+	p1 <= p0;
 	ready <= temp_ready;
 
-	process(clk100)
+	process(clk1)
 		variable i: natural range 0 to 4 := 0;
 	begin
-		if rising_edge(clk100) then
+		if rising_edge(clk1) then
 			if i = 4 then
 				clk10 <= not clk10;
 				i := 0;
@@ -53,8 +54,8 @@ begin
 		end if;
 	end process;
 	
-	-- 临时占用端口2进行初始化
-	process(rst, clk100)
+	-- 临时占用端口1进行初始化
+	process(rst, clk10)
 		variable i: natural range 0 to 64*64 := 0;
 	begin
 		if rst = '0' then

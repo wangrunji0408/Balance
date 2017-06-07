@@ -44,7 +44,8 @@ ENTITY SceneROM IS
 	(
 		address_a		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
 		address_b		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
-		clock		: IN STD_LOGIC  := '1';
+		clock_a		: IN STD_LOGIC  := '1';
+		clock_b		: IN STD_LOGIC ;
 		q_a		: OUT STD_LOGIC_VECTOR (5 DOWNTO 0);
 		q_b		: OUT STD_LOGIC_VECTOR (5 DOWNTO 0)
 	);
@@ -92,6 +93,7 @@ ARCHITECTURE SYN OF scenerom IS
 			clock0	: IN STD_LOGIC ;
 			wren_a	: IN STD_LOGIC ;
 			address_b	: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
+			clock1	: IN STD_LOGIC ;
 			data_b	: IN STD_LOGIC_VECTOR (5 DOWNTO 0);
 			q_a	: OUT STD_LOGIC_VECTOR (5 DOWNTO 0);
 			wren_b	: IN STD_LOGIC ;
@@ -110,12 +112,12 @@ BEGIN
 
 	altsyncram_component : altsyncram
 	GENERIC MAP (
-		address_reg_b => "CLOCK0",
+		address_reg_b => "CLOCK1",
 		clock_enable_input_a => "BYPASS",
 		clock_enable_input_b => "BYPASS",
 		clock_enable_output_a => "BYPASS",
 		clock_enable_output_b => "BYPASS",
-		indata_reg_b => "CLOCK0",
+		indata_reg_b => "CLOCK1",
 		init_file => "map.mif",
 		intended_device_family => "Cyclone II",
 		lpm_type => "altsyncram",
@@ -125,7 +127,7 @@ BEGIN
 		outdata_aclr_a => "NONE",
 		outdata_aclr_b => "NONE",
 		outdata_reg_a => "CLOCK0",
-		outdata_reg_b => "CLOCK0",
+		outdata_reg_b => "CLOCK1",
 		power_up_uninitialized => "FALSE",
 		widthad_a => 12,
 		widthad_b => 12,
@@ -133,12 +135,13 @@ BEGIN
 		width_b => 6,
 		width_byteena_a => 1,
 		width_byteena_b => 1,
-		wrcontrol_wraddress_reg_b => "CLOCK0"
+		wrcontrol_wraddress_reg_b => "CLOCK1"
 	)
 	PORT MAP (
-		clock0 => clock,
+		clock0 => clock_a,
 		wren_a => sub_wire2,
 		address_b => address_b,
+		clock1 => clock_b,
 		data_b => sub_wire3,
 		wren_b => sub_wire2,
 		address_a => address_a,
@@ -172,7 +175,7 @@ END SYN;
 -- Retrieval info: PRIVATE: CLRrren NUMERIC "0"
 -- Retrieval info: PRIVATE: CLRwraddress NUMERIC "0"
 -- Retrieval info: PRIVATE: CLRwren NUMERIC "0"
--- Retrieval info: PRIVATE: Clock NUMERIC "0"
+-- Retrieval info: PRIVATE: Clock NUMERIC "5"
 -- Retrieval info: PRIVATE: Clock_A NUMERIC "0"
 -- Retrieval info: PRIVATE: Clock_B NUMERIC "0"
 -- Retrieval info: PRIVATE: IMPLEMENT_IN_LES NUMERIC "0"
@@ -212,12 +215,12 @@ END SYN;
 -- Retrieval info: PRIVATE: enable NUMERIC "0"
 -- Retrieval info: PRIVATE: rden NUMERIC "0"
 -- Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
--- Retrieval info: CONSTANT: ADDRESS_REG_B STRING "CLOCK0"
+-- Retrieval info: CONSTANT: ADDRESS_REG_B STRING "CLOCK1"
 -- Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_A STRING "BYPASS"
 -- Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_B STRING "BYPASS"
 -- Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_A STRING "BYPASS"
 -- Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_B STRING "BYPASS"
--- Retrieval info: CONSTANT: INDATA_REG_B STRING "CLOCK0"
+-- Retrieval info: CONSTANT: INDATA_REG_B STRING "CLOCK1"
 -- Retrieval info: CONSTANT: INIT_FILE STRING "map.mif"
 -- Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone II"
 -- Retrieval info: CONSTANT: LPM_TYPE STRING "altsyncram"
@@ -227,7 +230,7 @@ END SYN;
 -- Retrieval info: CONSTANT: OUTDATA_ACLR_A STRING "NONE"
 -- Retrieval info: CONSTANT: OUTDATA_ACLR_B STRING "NONE"
 -- Retrieval info: CONSTANT: OUTDATA_REG_A STRING "CLOCK0"
--- Retrieval info: CONSTANT: OUTDATA_REG_B STRING "CLOCK0"
+-- Retrieval info: CONSTANT: OUTDATA_REG_B STRING "CLOCK1"
 -- Retrieval info: CONSTANT: POWER_UP_UNINITIALIZED STRING "FALSE"
 -- Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "12"
 -- Retrieval info: CONSTANT: WIDTHAD_B NUMERIC "12"
@@ -235,15 +238,17 @@ END SYN;
 -- Retrieval info: CONSTANT: WIDTH_B NUMERIC "6"
 -- Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "1"
 -- Retrieval info: CONSTANT: WIDTH_BYTEENA_B NUMERIC "1"
--- Retrieval info: CONSTANT: WRCONTROL_WRADDRESS_REG_B STRING "CLOCK0"
+-- Retrieval info: CONSTANT: WRCONTROL_WRADDRESS_REG_B STRING "CLOCK1"
 -- Retrieval info: USED_PORT: address_a 0 0 12 0 INPUT NODEFVAL "address_a[11..0]"
 -- Retrieval info: USED_PORT: address_b 0 0 12 0 INPUT NODEFVAL "address_b[11..0]"
--- Retrieval info: USED_PORT: clock 0 0 0 0 INPUT VCC "clock"
+-- Retrieval info: USED_PORT: clock_a 0 0 0 0 INPUT VCC "clock_a"
+-- Retrieval info: USED_PORT: clock_b 0 0 0 0 INPUT NODEFVAL "clock_b"
 -- Retrieval info: USED_PORT: q_a 0 0 6 0 OUTPUT NODEFVAL "q_a[5..0]"
 -- Retrieval info: USED_PORT: q_b 0 0 6 0 OUTPUT NODEFVAL "q_b[5..0]"
 -- Retrieval info: CONNECT: @address_a 0 0 12 0 address_a 0 0 12 0
 -- Retrieval info: CONNECT: @address_b 0 0 12 0 address_b 0 0 12 0
--- Retrieval info: CONNECT: @clock0 0 0 0 0 clock 0 0 0 0
+-- Retrieval info: CONNECT: @clock0 0 0 0 0 clock_a 0 0 0 0
+-- Retrieval info: CONNECT: @clock1 0 0 0 0 clock_b 0 0 0 0
 -- Retrieval info: CONNECT: @data_a 0 0 6 0 GND 0 0 6 0
 -- Retrieval info: CONNECT: @data_b 0 0 6 0 GND 0 0 6 0
 -- Retrieval info: CONNECT: @wren_a 0 0 0 0 GND 0 0 0 0

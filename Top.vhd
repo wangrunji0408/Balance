@@ -105,8 +105,10 @@ architecture arch of Top is
 			unit_size: in natural; 	--每格的边长
 			ball_radius: in natural;--球的半径
 			ax, ay: in integer; 	--加速度
-			
+			vx, vy: buffer integer;
 			px, py: buffer integer; 	--位置
+			vx1, vy1: in integer;
+			px1, py1: in integer; 	--位置
 			score: buffer integer; 	--分
 			result: buffer TResult;		--结果
 			
@@ -118,7 +120,7 @@ architecture arch of Top is
 	port (
 		clk: in std_logic;			--游戏端时钟，60Hz
 		rst, pause_in: in std_logic;	--复位，暂停按钮
-		result: in TResult;			--回合结束状态
+		result, result1: in TResult;			--回合结束状态
 		status: buffer TStatus;		--游戏状态
 		phy_rst, phy_pause: out std_logic --控制物理引擎的复位、暂停（当前是直接与按钮关联，未来可能有变）
 	);
@@ -126,7 +128,7 @@ architecture arch of Top is
 	
 	component SceneReader is
 	port (
-		clk100, rst: in std_logic;
+		clk1, clk2, rst: in std_logic;
 		x1, y1, x2, y2: MapXY;	-- 坐标
 		p1, p2: out TPos;  							-- 类型
 		start_x, start_y: out MapXY;	-- 起始点
@@ -169,8 +171,8 @@ architecture arch of Top is
 	
 	signal use_keyboard: boolean := false;
 	signal gyro_ax, gyro_ay, gyro_ax1, gyro_ay1, kb_ax, kb_ay, kb_ax1, kb_ay1: integer;
-	signal ax, ay, px, py, score: integer;
-	signal ax1, ay1, px1, py1, score1: integer;
+	signal ax, ay, vx, vy, px, py, score: integer;
+	signal ax1, ay1, vx1, vy1, px1, py1, score1: integer;
 	signal start_x, start_y: MapXY;
 	signal gate2_x, gate2_y: MapXY;
 	signal w, a, s, d, w1, a1, s1, d1: std_logic;
@@ -234,18 +236,18 @@ begin
 	ktw: KeyboardToWASD port map (keyboard_data, keyboard_clk, clk100, not rst, w, a, s, d, w1, a1, s1, d1);
 	wta0: WASDToAcc port map (w, a, s, d, kb_ax, kb_ay);
 	wta1: WASDToAcc port map (w1, a1, s1, d1, kb_ax1, kb_ay1);
-	reader: SceneReader port map (clk100, rst, physics_sx, physics_sy, renderer_sx, renderer_sy,
+	reader: SceneReader port map (clk100, clk_pixel, rst, physics_sx, physics_sy, renderer_sx, renderer_sy,
 					physics_pos_type, renderer_pos_type, start_x, start_y, gate2_x, gate2_y, ready);
 	
 	physics_sx <= physics_sx0 when clk_phy0 = '1' else physics_sx1;
 	physics_sy <= physics_sy0 when clk_phy0 = '1' else physics_sy1;
 	phy0: Physics port map (clk_phy0, clk100, phy_rst, phy_pause, 
 									physics_sx0, physics_sy0, physics_pos_type, start_x, start_y, gate2_x, gate2_y, ready,
-									unit_size, ball_radius, ax, ay, px, py, score, result, show_radius);
+									unit_size, ball_radius, ax, ay, vx, vy, px, py, vx1, vy1, px1, py1, score, result, show_radius);
 	phy1: Physics port map (clk_phy1, clk100, phy_rst, phy_pause, 
 									physics_sx1, physics_sy1, physics_pos_type, start_x, start_y, gate2_x, gate2_y, ready,
-									unit_size, ball_radius, ax1, ay1, px1, py1, score1, result1, show_radius1);
-	ctrl: StatusController port map (clk60, rst, pause, result, status, phy_rst, phy_pause);
+									unit_size, ball_radius, ax1, ay1, vx1, vy1, px1, py1, vx, vy, px, py, score1, result1, show_radius1);
+	ctrl: StatusController port map (clk60, rst, pause, result, result1, status, phy_rst, phy_pause);
 	--vga: vga640480 port map (rst, clk100, vga_x, vga_y, color, clk25, vga_hs, vga_vs_temp, vga_r, vga_g, vga_b);
 	pll: altpll0 port map (clk100, clk_pixel);
 	vga_r <= color_out(8 downto 6);
@@ -286,14 +288,14 @@ begin
 	
 	px_vec <= std_logic_vector( to_unsigned(px, 12) );
 	py_vec <= std_logic_vector( to_unsigned(py, 12) );
-	debug_display(6) <= DisplayNumber(start_x);
-	debug_display(5) <= DisplayNumber(start_y);
+	debug_display(6) <= DisplayNumber(gate2_x);
+	debug_display(5) <= DisplayNumber(gate2_y);
 
-	debug_display(3) <= DisplayNumber( ax0 );
-	debug_display(2) <= DisplayNumber( ay0 );
+	debug_display(3) <= DisplayNumber( ax );
+	debug_display(2) <= DisplayNumber( ay );
 	
-	debug_display(0) <= DisplayNumber(ay);
-	debug_display(1) <= DisplayNumber(ax);
+	debug_display(1) <= DisplayNumber(ax1);
+	debug_display(0) <= DisplayNumber(ay1);
 	--debug_display(0) <= DisplayNumber(scancode(3 downto 0));
 	--debug_display(1) <= DisplayNumber(scancode(7 downto 4));
 end arch ; -- arch

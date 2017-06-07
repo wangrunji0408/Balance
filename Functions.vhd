@@ -22,9 +22,23 @@ package Functions is
 	function isWall (t: TPos) return boolean;
 	function toString (x: integer range -100000 to 100000) return string;
 	function toChar (x: integer range 0 to 9) return character;
+	function in_circle (dx, dy: integer; r: natural) return boolean;
+	function limit (x, min, max: integer) return integer;
 end package;
 
 package body Functions is
+	function limit (x, min, max: integer) return integer is
+	begin
+		if x > max then return max;
+		elsif x < min then return min;
+		else return x;
+		end if;
+	end function;
+
+	function in_circle (dx, dy: integer; r: natural) return boolean is
+	begin
+		return abs(dx) <= r and abs(dy) <= r and dx * dx + dy * dy <= r * r;
+	end function;
 
 	function toChar (x: integer range 0 to 9) return character is
 	begin

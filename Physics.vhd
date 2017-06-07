@@ -19,8 +19,10 @@ entity Physics is
 		unit_size: in natural; 	--每格的边长
 		ball_radius: in natural;--球的半径
 		ax, ay: in integer; 	--加速度
-		
+		vx, vy: buffer integer;
 		px, py: buffer integer; 	--位置
+		vx1, vy1: in integer;
+		px1, py1: in integer; 	--位置
 		score: buffer integer; 			--分
 		result: buffer TResult;		--结果
 		
@@ -28,20 +30,29 @@ entity Physics is
 	);
 end entity;
 architecture arch of Physics is
-	signal temp_px, temp_py, temp_vx, temp_vy, temp_sceneX, temp_sceneY, temp_remX, temp_remY, temp_swapX, temp_swapY, temp_temp_vx, temp_temp_vy: integer;
+	signal temp_px, temp_py, temp_vx, temp_vy, temp_sceneX, temp_sceneY, temp_remX, temp_remY, temp_temp_vx, temp_temp_vy: integer;
 	signal temp_scene: integer;
-	signal vx, vy: integer := 0;
 	signal sx, sy: natural;
-	signal wallx, wally: boolean;
+	signal wallx, wally, wall: boolean;
 	signal temp_type: TPos;
 	signal clk_num: integer := 0;
 	signal clk1000: std_logic;
+	signal near, last_near, collide: boolean;
 	constant vmax: natural := 4096;
+	
+	function s2p (s: MapXY; unit_size: natural) return natural is
+	begin
+		return s * unit_size + unit_size / 2;
+	end function;
 begin
-	wallx <= temp_sceneX /= sx and isWall(temp_type);
-	wally <= temp_sceneY /= sy and isWall(temp_type);
-	temp_px <= gate2_x when temp_type = Gate1 else px + vx;
-	temp_py <= gate2_y when temp_type = Gate1 else py + vy;
+	near <= in_circle(px - px1, py - py1, ball_radius * 2);
+	collide <= not last_near and near;
+	
+	wall <= isWall(temp_type);
+	wallx <= temp_sceneX /= sx and wall;
+	wally <= temp_sceneY /= sy and wall;
+	temp_px <= s2p(gate2_x, unit_size) when temp_type = Gate1 else px + vx;
+	temp_py <= s2p(gate2_y, unit_size) when temp_type = Gate1 else py + vy;
 	temp_temp_vx <= -vx when wallx and temp_type = IronWall else
 					-(vx / 2 + temp_remX) when wallx and temp_type = GlassWall else
 					-(vx / 10 + 2 * temp_remX) when wallx and temp_type = WoodWall else
@@ -62,24 +73,31 @@ begin
 					-1 when vx < 0 else 0;
 	temp_remY <= 1 when vy > 0 else
 					-1 when vy < 0 else 0;
-	temp_swapX <= 1 when temp_type = AccR else
-					 -1 when temp_type = AccL else 0;
-	temp_swapY <= 1 when temp_type = AccD else
-					 -1 when temp_type = AccU else 0;
 					 
 	process (temp_temp_vx, temp_temp_vy)
 		variable vx, vy: integer;
+		constant acc: natural := 5;
 	begin
-		vx := temp_temp_vx + temp_swapX * 5;
-		if vx > vmax then vx := vmax;
-		elsif vx < -vmax then vx := -vmax;
+		vx := temp_temp_vx;
+		vy := temp_temp_vy;
+		if temp_type = AccR then
+			vx := vx + acc;
+		elsif temp_type = AccL then
+			vx := vx - acc;
+		elsif temp_type = AccD then
+			vy := vy + acc;
+		elsif temp_type = AccU then
+			vy := vy - acc;
 		end if;
-		temp_vx <= vx;
 		
-		vy := temp_temp_vy + temp_swapY * 5;
-		if vy > vmax then vy := vmax;
-		elsif vy < -vmax then vy := -vmax;
+		if collide then
+			vx := vx1;
+			vy := vy1;
 		end if;
+		
+		vx := limit(vx, -vmax, vmax);
+		vy := limit(vy, -vmax, vmax);
+		temp_vx <= vx;
 		temp_vy <= vy;
 	end process;
 
@@ -111,14 +129,16 @@ begin
 			last_ready := '0';
 		elsif falling_edge(clk60) then
 			if last_ready = '0' and ready = '1' then
-				px <= start_x * unit_size;
-				py <= start_y * unit_size;
+				px <= s2p(start_x, unit_size);
+				py <= s2p(start_y, unit_size);
 				show_radius <= ball_radius;
 			elsif pause = '0' or result = Die or result = Win then
 				
 			else
-				px <= temp_px;
-				py <= temp_py;
+				if not wall then 
+					px <= temp_px;
+					py <= temp_py;
+				end if;
 				vx <= temp_vx;
 				vy <= temp_vy;
 				sx <= temp_sceneX;
@@ -138,6 +158,7 @@ begin
 				end if;
 			end if;
 			last_ready := ready;
+			last_near <= near;
 		end if;
 	end process;
 

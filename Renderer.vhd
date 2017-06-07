@@ -22,7 +22,7 @@ entity Renderer is
 		status: in TStatus;		--游戏状态
 		result: in TResult;
 		
-		vga_clk: in std_logic;	--VGA端的时钟，25MHz
+		vga_clk: in std_logic;	--VGA端的时钟
 		pixel_x, pixel_y: in natural;	--查询像素的坐标
 		color: out TColor;					--输出像素颜色
 		
@@ -88,29 +88,48 @@ architecture game of Renderer is
 	signal image_color: TColor;
 	signal font_bit: std_logic;
 	signal rgb: TColor;
-	signal show_area: boolean;
+	signal show_area, show_close, show_small_map: boolean;
 	
 	signal temp_x, temp_y: integer;
-	signal sceneX, sceneY, distance, distance1, temp_scene: integer;
+	signal sceneX, sceneY: MapXY;
+	signal close_px, close_py: integer;
 	signal clk_num: integer := 0;
+	signal anchor_px, anchor_py: integer := 0;
+	signal anchor_pixel_x, anchor_pixel_y: integer := 384;
+	signal scale1: natural := scale;
 	
-	function in_circle (dx, dy: integer; r: natural) return boolean is
-	begin
-		return abs(dx) <= r and abs(dy) <= r and dx * dx + dy * dy <= r * r;
-	end function;
-
+	signal small_sx, small_sy: MapXY;
 begin
 	image: ImageReader port map (vga_clk, image_id, x, y, image_color);
 	font: FontReader port map (vga_clk, font_id, x, y, font_bit);
 	
-	temp_x <= pixel_x * scale;
-	temp_y <= pixel_y * scale;
+	close_px <= (pixel_x - anchor_pixel_x) * scale1 + anchor_px;
+	close_py <= (pixel_y - anchor_pixel_y) * scale1 + anchor_py;
+	temp_x <= close_px when show_close else pixel_x * scale;
+	temp_y <= close_py when show_close else pixel_y * scale;
 	sceneX <= temp_x / unit_size;
 	sceneY <= temp_y / unit_size;
-	sx <= sceneX;
-	sy <= sceneY;
+	
+	show_close <= true;
+	
+	sx <= sceneX when show_area else
+			small_sx when show_small_map;
+	sy <= sceneY when show_area else
+			small_sy when show_small_map;
 	show_area <= pixel_x < 768;
 	color <= rgb;
+	
+	show_small_map <= pixel_x >= 800 and pixel_x < 800+256 and pixel_y < 256;
+	small_sx <= (pixel_x - 800) / 4;
+	small_sy <= pixel_y / 4;
+	
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			anchor_px <= anchor_px + (px - anchor_px) / 64;
+			anchor_py <= anchor_py + (py - anchor_py) / 64;
+		end if;
+	end process;
 	
 	process(clk)
 	begin
@@ -135,26 +154,29 @@ begin
 					y <= (temp_x - px) * 8 / ball_radius + 8;
 					x <= (temp_y - py) * 8 / ball_radius + 8;
 					image_id <= 25;
-					rgb <= image_color;
 				elsif in_circle(temp_x - px1, temp_y - py1, ball_radius) then
 					y <= (temp_x - px1) * 8 / ball_radius + 8;
 					x <= (temp_y - py1) * 8 / ball_radius + 8;
 					image_id <= 24;
-					rgb <= image_color;
 				else
 					-- Use texture
-					x <= (pixel_y * scale - sceneY * unit_size) * 16 / unit_size;
-					y <= (pixel_x * scale - sceneX * unit_size) * 16 / unit_size;
+					x <= (temp_y - sceneY * unit_size) * 16 / unit_size;
+					y <= (temp_x - sceneX * unit_size) * 16 / unit_size;
 					if clk_num < 30 then 
 						image_id <= TPos'pos(pos_type);
 					else
 						image_id <= TPos'pos(pos_type) + 32;
 					end if;
-					rgb <= image_color;
 					
 					-- Use color
 					--rgb <= ToColor( pos_type );
 				end if;
+				rgb <= image_color;
+			elsif show_small_map then
+				x <= 0;
+				y <= 0;
+				image_id <= TPos'pos(pos_type);
+				rgb <= image_color;
 			else
 				rgb <= o"000";
 			end if;
