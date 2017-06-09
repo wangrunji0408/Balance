@@ -148,7 +148,6 @@ set_global_assignment -name VHDL_FILE Renderer.vhd
 set_global_assignment -name VHDL_FILE SceneReader.vhd
 set_global_assignment -name VHDL_FILE StatusController.vhd
 set_global_assignment -name VHDL_FILE Top.vhd
-set_global_assignment -name VHDL_FILE VGA640480.vhd
 set_global_assignment -name QIP_FILE SceneROM.qip
 set_global_assignment -name QIP_FILE ImageROM.qip
 set_global_assignment -name QIP_FILE FontROM.qip
@@ -156,9 +155,9 @@ set_global_assignment -name VHDL_FILE Layer.vhd
 set_location_assignment PIN_D15 -to i2c_data
 set_location_assignment PIN_A17 -to i2c_clk
 set_location_assignment PIN_AD5 -to gyro_rst
-set_location_assignment PIN_B17 -to i2c_data1
-set_location_assignment PIN_A18 -to i2c_clk1
-set_location_assignment PIN_B18 -to gyro1_vcc
+set_location_assignment PIN_B20 -to i2c_data1
+set_location_assignment PIN_E20 -to i2c_clk1
+set_location_assignment PIN_D20 -to gyro1_vcc
 set_global_assignment -name QIP_FILE altpll0.qip
 set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_1
 set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_1
@@ -281,5 +280,5 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=128"
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=462" -section_id auto_signaltap_1
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=21127" -section_id auto_signaltap_1
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=128" -section_id auto_signaltap_1
-set_global_assignment -name SLD_FILE "//Mac/Home/Documents/Codes/Tsinghua/Grade2-2/DigitalCircuits/Balance/src/stp1_auto_stripped.stp"
+set_global_assignment -name SLD_FILE "//Mac/Home/Documents/Codes/Tsinghua/Grade2-2/DigitalCircuits/Balance_temp/src/stp1_auto_stripped.stp"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

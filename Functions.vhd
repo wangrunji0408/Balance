@@ -24,9 +24,14 @@ package Functions is
 	function toChar (x: integer range 0 to 9) return character;
 	function in_circle (dx, dy: integer; r: natural) return boolean;
 	function limit (x, min, max: integer) return integer;
+	function max (a, b: integer) return integer;
 end package;
 
 package body Functions is
+	function max (a, b: integer) return integer is
+	begin
+		if a < b then return b; else return a; end if;
+	end function;
 	function limit (x, min, max: integer) return integer is
 	begin
 		if x > max then return max;
@@ -48,7 +53,7 @@ package body Functions is
 	function toString (x: integer range -100000 to 100000) return string is
 		variable s: string(1 to 6);
 		constant minus: boolean := x < 0;
-		variable absx: natural;
+		variable absx: natural range 0 to 100000;
 	begin
 		if minus then absx := -x; else absx := x; end if;
 		s(6) := toChar(absx mod 10);

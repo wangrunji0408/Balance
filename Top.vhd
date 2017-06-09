@@ -69,15 +69,11 @@ architecture arch of Top is
 			sx, sy: out MapXY;
 			pos_type: in TPos;
 			
-			unit_size: in natural; 	--每格的边长
-			ball_radius: in natural;--球的半径
-			scale: in natural;
-			
 			px, py: in integer; 		--位置
 			px1, py1: in integer; 	--位置
 			score, score1: in integer; 		--分数
 			status: in TStatus;		--游戏状态
-			result: in TResult;
+			result, result1: in TResult;
 			
 			vga_clk: in std_logic;	--VGA端的时钟，25MHz
 			pixel_x, pixel_y: in natural;	--查询像素的坐标
@@ -192,6 +188,9 @@ architecture arch of Top is
 	signal renderer_pos_type: TPos;
 	
 	signal show_radius, show_radius1: natural;
+
+	signal latch_px, latch_py, latch_px1, latch_py1: integer;
+	signal latch_vx, latch_vy, latch_vx1, latch_vy1: integer;
 	
 	constant unit_size: natural := 8192;
 	constant ball_radius: natural := 4096;
@@ -225,6 +224,20 @@ begin
 		end if;
 	end process;
 
+	process (clk60)
+	begin
+		if rising_edge(clk60) then
+			latch_px <= px;
+			latch_py <= py;
+			latch_px1 <= px1;
+			latch_py1 <= py1;
+			latch_vx <= vx;
+			latch_vy <= vy;
+			latch_vx1 <= vx1;
+			latch_vy1 <= vy1;
+		end if;
+	end process;
+
 	ax <= kb_ax * 8 when use_keyboard else gyro_ax;
 	ay <= kb_ay * 8 when use_keyboard else gyro_ay;
 	ax1 <= kb_ax1 * 8 when use_keyboard else gyro_ax1;
@@ -243,10 +256,10 @@ begin
 	physics_sy <= physics_sy0 when clk_phy0 = '1' else physics_sy1;
 	phy0: Physics port map (clk_phy0, clk100, phy_rst, phy_pause, 
 									physics_sx0, physics_sy0, physics_pos_type, start_x, start_y, gate2_x, gate2_y, ready,
-									unit_size, ball_radius, ax, ay, vx, vy, px, py, vx1, vy1, px1, py1, score, result, show_radius);
+									unit_size, ball_radius, ax, ay, vx, vy, px, py, latch_vx1, latch_vy1, latch_px1, latch_py1, score, result, show_radius);
 	phy1: Physics port map (clk_phy1, clk100, phy_rst, phy_pause, 
 									physics_sx1, physics_sy1, physics_pos_type, start_x, start_y, gate2_x, gate2_y, ready,
-									unit_size, ball_radius, ax1, ay1, vx1, vy1, px1, py1, vx, vy, px, py, score1, result1, show_radius1);
+									unit_size, ball_radius, ax1, ay1, vx1, vy1, px1, py1, latch_vx, latch_vy, latch_px, latch_py, score1, result1, show_radius1);
 	ctrl: StatusController port map (clk60, rst, pause, result, result1, status, phy_rst, phy_pause);
 	--vga: vga640480 port map (rst, clk100, vga_x, vga_y, color, clk25, vga_hs, vga_vs_temp, vga_r, vga_g, vga_b);
 	pll: altpll0 port map (clk100, clk_pixel);
@@ -263,15 +276,13 @@ begin
 		sx => renderer_sx,
 		sy => renderer_sy,
 		pos_type => renderer_pos_type,
-		unit_size => unit_size,
-		ball_radius => show_radius,
-		scale => scale,
 		px => px, py => py,
 		px1 => px1, py1 => py1,
 		score => score,
 		score1 => score1,
 		status => status,
 		result => result,
+		result1 => result1,
 		vga_clk => clk_pixel,
 		pixel_x => vga_x,
 		pixel_y => vga_y,

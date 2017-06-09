@@ -73,8 +73,8 @@ begin
 	gx1 <= to_integer(signed(gz));
 	gy1 <= to_integer(signed(gy));
 	gz1 <= to_integer(signed(gz));
-	ax_out <= to_integer(SHIFT_RIGHT(signed(ay),10));
-	ay_out <= to_integer(SHIFT_RIGHT(signed(ax),10));
+	ax_out <= to_integer(SHIFT_RIGHT(signed(ay),12));
+	ay_out <= to_integer(SHIFT_RIGHT(signed(ax),12));
 	
 	process (clk100)
 		variable busy_event_cnt : natural := 0;

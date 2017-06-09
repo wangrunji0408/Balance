@@ -12,15 +12,11 @@ entity Renderer is
 		sx, sy: out MapXY;
 		pos_type: in TPos;
 		
-		unit_size: in natural; 	--每格的边长
-		ball_radius: in natural;--球的半径
-		scale: in natural;
-		
 		px, py: in integer; 		--位置
 		px1, py1: in integer; 	--位置
 		score, score1: in integer; 		--分数
 		status: in TStatus;		--游戏状态
-		result: in TResult;
+		result, result1: in TResult;
 		
 		vga_clk: in std_logic;	--VGA端的时钟
 		pixel_x, pixel_y: in natural;	--查询像素的坐标
@@ -83,6 +79,10 @@ architecture game of Renderer is
 		);
 	end component;
 
+	constant unit_size: natural := 8192;
+	constant ball_radius: natural := 4096;
+	constant scale: natural := 512;
+	
 	signal image_id, font_id: natural;
 	signal x, y: natural range 0 to 15;
 	signal image_color: TColor;
@@ -97,14 +97,26 @@ architecture game of Renderer is
 	signal anchor_px, anchor_py: integer := 0;
 	signal anchor_pixel_x, anchor_pixel_y: integer := 384;
 	signal scale1: natural := scale;
+	signal clk2, clk4: std_logic := '0';
+	signal inside0, inside1: boolean;
 	
 	signal small_sx, small_sy: MapXY;
+	signal sx0, sy0, sx1, sy1: MapXY;
+	
+	function in_circle1 (dx, dy: integer; r: natural) return boolean is
+		constant absx: natural := abs(dx);
+		constant absy: natural := abs(dy);
+	begin
+		--return absx <= r and absy <= r and absx ** 2 + absy ** 2 <= r ** 2;
+		return absx <= r and absy <= r and 2 * absx + absy <= 2 * r + r / 4 and 2 * absy + absx <= 2 * r + r / 4;
+	end function;
+	
 begin
 	image: ImageReader port map (vga_clk, image_id, x, y, image_color);
 	font: FontReader port map (vga_clk, font_id, x, y, font_bit);
 	
-	close_px <= (pixel_x - anchor_pixel_x) * scale1 + anchor_px;
-	close_py <= (pixel_y - anchor_pixel_y) * scale1 + anchor_py;
+	close_px <= pixel_x * scale1 + (anchor_px - anchor_pixel_x * scale1);
+	close_py <= pixel_y * scale1 + (anchor_py - anchor_pixel_y * scale1);
 	temp_x <= close_px when show_close else pixel_x * scale;
 	temp_y <= close_py when show_close else pixel_y * scale;
 	sceneX <= temp_x / unit_size;
@@ -112,31 +124,60 @@ begin
 	
 	show_close <= true;
 	
+	inside0 <= in_circle1(temp_x - px, temp_y - py, ball_radius);
+	inside1 <= in_circle1(temp_x - px1, temp_y - py1, ball_radius);
+	
 	sx <= sceneX when show_area else
 			small_sx when show_small_map;
 	sy <= sceneY when show_area else
 			small_sy when show_small_map;
-	show_area <= pixel_x < 768;
+		show_area <= pixel_x < 768 and temp_x >= 0 and temp_y >= 0 and sceneX < 48 and sceneY < 48;
 	color <= rgb;
 	
 	show_small_map <= pixel_x >= 800 and pixel_x < 800+256 and pixel_y < 256;
 	small_sx <= (pixel_x - 800) / 4;
 	small_sy <= pixel_y / 4;
 	
+	sx0 <= px / unit_size;
+	sy0 <= py / unit_size;
+	sx1 <= px1 / unit_size;
+	sy1 <= py1 / unit_size;
+
 	process(clk)
+		variable target_px, target_py, target_scale: integer;
+		variable maxp: natural;
 	begin
 		if rising_edge(clk) then
-			anchor_px <= anchor_px + (px - anchor_px) / 64;
-			anchor_py <= anchor_py + (py - anchor_py) / 64;
+			target_px := (px + px1) / 2;
+			target_py := (py + py1) / 2;
+			maxp := max(abs(px - px1), abs(py - py1));
+--			if maxp > 16 * unit_size then
+--				target_scale := scale;
+--			elsif maxp > 8 * unit_size then
+--				target_scale := scale / 2;
+--			elsif maxp > 4 * unit_size then
+--				target_scale := scale / 4;
+--			else
+--				target_scale := scale / 8;
+--			end if;
+			target_scale := scale * limit(max(abs(px - px1), abs(py - py1)), 8 * unit_size, 40 * unit_size) / (32 * unit_size);
+			anchor_px <= anchor_px + (target_px - anchor_px) / 32;
+			anchor_py <= anchor_py + (target_py - anchor_py) / 32;
+			scale1 <= scale1 + (target_scale - scale1) / 32;
 		end if;
 	end process;
 	
 	process(clk)
+		variable clk_num: integer := 0;
 	begin
 		if rising_edge(clk) then
-			clk_num <= clk_num + 1;
-			if clk_num = 60 then
-				clk_num <= 0;
+			clk_num := clk_num + 1;
+			if clk_num = 15 or clk_num = 30 then
+				clk4 <= not clk4;
+			end if;
+			if clk_num = 30 then
+				clk_num := 0;
+				clk2 <= not clk2;
 			end if;
 		end if;
 	end process;
@@ -146,23 +187,32 @@ begin
 		variable row, col: natural;
 	begin
 		if rising_edge(vga_clk) then	
-			y <= pixel_x; x <= pixel_y;
+			x <= 0;
+			y <= 0;
+			image_id <= 0;
+			font_id <= 0;
 			
 			-- Render Scene
 			if show_area then
-				if in_circle(temp_x - px, temp_y - py, ball_radius) then
+				if inside0 then
 					y <= (temp_x - px) * 8 / ball_radius + 8;
 					x <= (temp_y - py) * 8 / ball_radius + 8;
+					--y <= ((temp_x - px) * 8) / 4096 + 8;
+					--x <= ((temp_y - py) * 8) / 4096 + 8;
 					image_id <= 25;
-				elsif in_circle(temp_x - px1, temp_y - py1, ball_radius) then
+				elsif inside1 then
 					y <= (temp_x - px1) * 8 / ball_radius + 8;
 					x <= (temp_y - py1) * 8 / ball_radius + 8;
+					--y <= ((temp_x - px1) * 8) / 4096 + 8;
+					--x <= ((temp_y - py1) * 8) / 4096 + 8;
 					image_id <= 24;
 				else
 					-- Use texture
 					x <= (temp_y - sceneY * unit_size) * 16 / unit_size;
 					y <= (temp_x - sceneX * unit_size) * 16 / unit_size;
-					if clk_num < 30 then 
+					-- x <= ((temp_y - sceneY * unit_size) * 16) / 8192;
+					-- y <= ((temp_x - sceneX * unit_size) * 16) / 8192;
+					if clk2 = '0' then 
 						image_id <= TPos'pos(pos_type);
 					else
 						image_id <= TPos'pos(pos_type) + 32;
@@ -176,7 +226,13 @@ begin
 				x <= 0;
 				y <= 0;
 				image_id <= TPos'pos(pos_type);
-				rgb <= image_color;
+				if small_sx = sx0 and small_sy = sy0 then
+					if clk4 = '1' then rgb <= o"070"; else rgb <= o"000"; end if;
+				elsif small_sx = sx1 and small_sy = sy1 then
+					if clk4 = '1' then rgb <= o"700"; else rgb <= o"000"; end if;
+				else
+					rgb <= image_color;
+				end if;
 			else
 				rgb <= o"000";
 			end if;
@@ -212,10 +268,10 @@ begin
 				when Pause =>
 					RenderString(font_id, x, y, font_bit, "Pause", o"777", o"000", true, 32, 200,200, pixel_x, pixel_y, rgb);
 				when Gameover => 
-					if result = Win then
-						RenderString(font_id, x, y, font_bit, "Win", o"700", o"000", true, 32, 200,200, pixel_x, pixel_y, rgb);
-					elsif result = Die then
-						RenderString(font_id, x, y, font_bit, "Die", o"777", o"000", true, 32, 200,200, pixel_x, pixel_y, rgb);
+					if result = Win or result1 = Die then
+						RenderString(font_id, x, y, font_bit, "Player0 Win!", o"700", o"000", true, 32, 200,200, pixel_x, pixel_y, rgb);
+					elsif result = Die or result1 = Win then
+						RenderString(font_id, x, y, font_bit, "Player1 Win!", o"777", o"000", true, 32, 200,200, pixel_x, pixel_y, rgb);
 					end if;
 				when others => null;
 			end case;
@@ -235,8 +291,8 @@ begin
 			else
 				RenderString(font_id, x, y, font_bit, "Input: Gyro", o"777", o"000", true, 16, 768, 768-16*3, pixel_x, pixel_y, rgb);
 			end if;
-			RenderString(font_id, x, y, font_bit, "Player0: " & toString(conv_integer(score)), o"700", o"000", true, 16, 768, 768-16*2, pixel_x, pixel_y, rgb);
-			RenderString(font_id, x, y, font_bit, "Player1: " & toString(conv_integer(score1)), o"700", o"000", true, 16, 768, 768-16, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "Player0: " & toString(conv_integer(score)), o"700", o"000", true, 16, 768, 768-16*2, pixel_x, pixel_y, rgb);
+			--RenderString(font_id, x, y, font_bit, "Player1: " & toString(conv_integer(score1)), o"700", o"000", true, 16, 768, 768-16, pixel_x, pixel_y, rgb);
 
 			
 		end if;

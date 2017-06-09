@@ -33,7 +33,7 @@ architecture arch of Physics is
 	signal temp_px, temp_py, temp_vx, temp_vy, temp_sceneX, temp_sceneY, temp_remX, temp_remY, temp_temp_vx, temp_temp_vy: integer;
 	signal temp_scene: integer;
 	signal sx, sy: natural;
-	signal wallx, wally, wall: boolean;
+	signal temp_wallx, temp_wally, wall, wallx, wally: boolean;
 	signal temp_type: TPos;
 	signal clk_num: integer := 0;
 	signal clk1000: std_logic;
@@ -49,8 +49,10 @@ begin
 	collide <= not last_near and near;
 	
 	wall <= isWall(temp_type);
-	wallx <= temp_sceneX /= sx and wall;
-	wally <= temp_sceneY /= sy and wall;
+	temp_wallx <= temp_sceneX /= sx and wall;
+	temp_wally <= temp_sceneY /= sy and wall;
+	wallx <= (not temp_wally and temp_wallx) or (temp_wally and temp_wallx and (abs(vx) < abs(vy) / 4 or not (abs(vx) / 4 >= abs(vy))));
+	wally <= (not temp_wallx and temp_wally) or (temp_wallx and temp_wally and (not(abs(vx) < abs(vy) / 4) or (abs(vx) / 4 >= abs(vy))));
 	temp_px <= s2p(gate2_x, unit_size) when temp_type = Gate1 else px + vx;
 	temp_py <= s2p(gate2_y, unit_size) when temp_type = Gate1 else py + vy;
 	temp_temp_vx <= -vx when wallx and temp_type = IronWall else
@@ -69,14 +71,14 @@ begin
 					-2 * vy when (temp_type = SpringU and temp_remY >= 0) or (temp_type = SpringD and temp_remY <= 0) else vy + ay;
 	temp_sceneX <= temp_px / unit_size;
 	temp_sceneY <= temp_py / unit_size;
-	temp_remX <= 1 when vx > 0 else
-					-1 when vx < 0 else 0;
-	temp_remY <= 1 when vy > 0 else
-					-1 when vy < 0 else 0;
+	temp_remX <= 3 when vx > 0 else
+					-3 when vx < 0 else 0;
+	temp_remY <= 3 when vy > 0 else
+					-3 when vy < 0 else 0;
 					 
 	process (temp_temp_vx, temp_temp_vy)
 		variable vx, vy: integer;
-		constant acc: natural := 5;
+		constant acc: natural := 10;
 	begin
 		vx := temp_temp_vx;
 		vy := temp_temp_vy;
@@ -105,16 +107,6 @@ begin
 	query_sx <= temp_sceneX;
 	query_sy <= temp_sceneY;
 	temp_type <= pos_type;
-	process(clk100)
-	begin
-		if rising_edge(clk100) then
-			clk_num <= clk_num + 1;
-			if clk_num = 500000 then
-				clk_num <= 0;
-				clk1000 <= not clk1000;
-			end if;
-		end if;
-	end process;
 	process(clk60)
 		variable last_ready: std_logic := '0';
 	begin
@@ -144,8 +136,8 @@ begin
 				sx <= temp_sceneX;
 				sy <= temp_sceneY;
 				if temp_type = Hole then
-					show_radius <= show_radius - 4;
-					if show_radius < ball_radius / 2 then 
+					show_radius <= show_radius - 1;
+					if show_radius < ball_radius then 
 						result <= Die;
 					end if;
 				elsif temp_type = EndPoint then
